@@ -258,7 +258,7 @@ public class Settings {
     private boolean tmsFollowEvolutions;
 
     public enum TMsHMsCompatibilityMod {
-        UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
+        UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL, FULLNORMAL
     }
 
     private TMsHMsCompatibilityMod tmsHmsCompatibilityMod = TMsHMsCompatibilityMod.UNCHANGED;
@@ -438,7 +438,8 @@ public class Settings {
                 tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE,
                 tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.UNCHANGED, tmsMod == TMsMod.RANDOM,
                 tmsMod == TMsMod.UNCHANGED, tmLevelUpMoveSanity, keepFieldMoveTMs,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
+                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL,
+                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULLNORMAL));
 
         // 19 tms part 2
         out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));

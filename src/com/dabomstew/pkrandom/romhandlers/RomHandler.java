@@ -400,6 +400,8 @@ public interface RomHandler {
     void randomizeTMHMCompatibility(Settings settings);
 
     void fullTMHMCompatibility();
+    
+    void fullNormalTMHMCompatibility();
 
     void ensureTMCompatSanity();
 

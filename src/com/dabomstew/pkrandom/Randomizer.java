@@ -349,6 +349,10 @@ public class Randomizer {
                 romHandler.fullTMHMCompatibility();
                 tmsHmsCompatChanged = true;
                 break;
+            case FULLNORMAL:
+                romHandler.fullNormalTMHMCompatibility();
+                tmsHmsCompatChanged = true;
+                break;
             default:
                 break;
         }
