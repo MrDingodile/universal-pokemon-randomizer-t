@@ -252,13 +252,14 @@ public class Settings {
     private boolean tmLevelUpMoveSanity;
     private boolean keepFieldMoveTMs;
     private boolean fullHMCompat;
+    private boolean fullNormalHMCompat;
     private boolean tmsForceGoodDamaging;
     private int tmsGoodDamagingPercent = 0;
     private boolean blockBrokenTMMoves;
     private boolean tmsFollowEvolutions;
 
     public enum TMsHMsCompatibilityMod {
-        UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL, FULLNORMAL
+        UNCHANGED, RANDOM_PREFER_TYPE, COMPLETELY_RANDOM, FULL
     }
 
     private TMsHMsCompatibilityMod tmsHmsCompatibilityMod = TMsHMsCompatibilityMod.UNCHANGED;
@@ -438,8 +439,7 @@ public class Settings {
                 tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.RANDOM_PREFER_TYPE,
                 tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.UNCHANGED, tmsMod == TMsMod.RANDOM,
                 tmsMod == TMsMod.UNCHANGED, tmLevelUpMoveSanity, keepFieldMoveTMs,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL,
-                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULLNORMAL));
+                tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
 
         // 19 tms part 2
         out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
@@ -2037,6 +2037,14 @@ public class Settings {
 
     public void setFullHMCompat(boolean fullHMCompat) {
         this.fullHMCompat = fullHMCompat;
+    }
+
+    public boolean isFullNormalHMCompat() {
+        return fullNormalHMCompat;
+    }
+
+    public void setFullNormalHMCompat(boolean fullNormalHMCompat) {
+        this.fullNormalHMCompat = fullNormalHMCompat;
     }
 
     public boolean isTmsForceGoodDamaging() {

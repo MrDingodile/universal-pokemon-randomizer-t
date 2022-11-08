@@ -162,6 +162,7 @@ public class NewRandomizerGUI {
     private JRadioButton tmUnchangedRadioButton;
     private JRadioButton tmRandomRadioButton;
     private JCheckBox tmFullHMCompatibilityCheckBox;
+    private JCheckBox tmFullNormalHMCompatibilityCheckBox;
     private JCheckBox tmLevelupMoveSanityCheckBox;
     private JCheckBox tmKeepFieldMoveTMsCheckBox;
     private JCheckBox tmForceGoodDamagingCheckBox;
@@ -170,7 +171,6 @@ public class NewRandomizerGUI {
     private JRadioButton thcRandomPreferSameTypeRadioButton;
     private JRadioButton thcRandomCompletelyRadioButton;
     private JRadioButton thcFullCompatibilityRadioButton;
-    private JRadioButton thcFullNormalCompatibilityRadioButton;
     private JRadioButton mtUnchangedRadioButton;
     private JRadioButton mtRandomRadioButton;
     private JCheckBox mtLevelupMoveSanityCheckBox;
@@ -458,7 +458,6 @@ public class NewRandomizerGUI {
         thcRandomPreferSameTypeRadioButton.addActionListener(e -> enableOrDisableSubControls());
         thcRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         thcFullCompatibilityRadioButton.addActionListener(e -> enableOrDisableSubControls());
-        thcFullNormalCompatibilityRadioButton.addActionListener(e -> enableOrDisableSubControls());
         mtUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         mtRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         mtForceGoodDamagingCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1630,8 +1629,8 @@ public class NewRandomizerGUI {
         tmLevelupMoveSanityCheckBox.setSelected(settings.isTmLevelUpMoveSanity());
         tmKeepFieldMoveTMsCheckBox.setSelected(settings.isKeepFieldMoveTMs());
         thcFullCompatibilityRadioButton.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULL);
-        thcFullNormalCompatibilityRadioButton.setSelected(settings.getTmsHmsCompatibilityMod() == Settings.TMsHMsCompatibilityMod.FULLNORMAL);
         tmFullHMCompatibilityCheckBox.setSelected(settings.isFullHMCompat());
+        tmFullNormalHMCompatibilityCheckBox.setSelected(settings.isFullNormalHMCompat());
         tmForceGoodDamagingCheckBox.setSelected(settings.isTmsForceGoodDamaging());
         tmForceGoodDamagingSlider.setValue(settings.getTmsGoodDamagingPercent());
         tmNoGameBreakingMovesCheckBox.setSelected(settings.isBlockBrokenTMMoves());
@@ -1841,10 +1840,11 @@ public class NewRandomizerGUI {
         settings.setTmsMod(tmUnchangedRadioButton.isSelected(), tmRandomRadioButton.isSelected());
 
         settings.setTmsHmsCompatibilityMod(thcUnchangedRadioButton.isSelected(), thcRandomPreferSameTypeRadioButton.isSelected(),
-                thcRandomCompletelyRadioButton.isSelected(), thcFullCompatibilityRadioButton.isSelected(), thcFullNormalCompatibilityRadioButton.isSelected());
+                thcRandomCompletelyRadioButton.isSelected(), thcFullCompatibilityRadioButton.isSelected());
         settings.setTmLevelUpMoveSanity(tmLevelupMoveSanityCheckBox.isSelected());
         settings.setKeepFieldMoveTMs(tmKeepFieldMoveTMsCheckBox.isSelected());
         settings.setFullHMCompat(tmFullHMCompatibilityCheckBox.isSelected() && tmFullHMCompatibilityCheckBox.isVisible());
+        settings.setFullNormalHMCompat(tmFullNormalHMCompatibilityCheckBox.isSelected() && tmFullNormalHMCompatibilityCheckBox.isVisible());
         settings.setTmsForceGoodDamaging(tmForceGoodDamagingCheckBox.isSelected());
         settings.setTmsGoodDamagingPercent(tmForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenTMMoves(tmNoGameBreakingMovesCheckBox.isSelected());
@@ -2492,6 +2492,9 @@ public class NewRandomizerGUI {
         tmFullHMCompatibilityCheckBox.setVisible(true);
         tmFullHMCompatibilityCheckBox.setEnabled(false);
         tmFullHMCompatibilityCheckBox.setSelected(false);
+        tmFullNormalHMCompatibilityCheckBox.setVisible(true);
+        tmFullNormalHMCompatibilityCheckBox.setEnabled(false);
+        tmFullNormalHMCompatibilityCheckBox.setSelected(false);
         tmLevelupMoveSanityCheckBox.setVisible(true);
         tmLevelupMoveSanityCheckBox.setEnabled(false);
         tmLevelupMoveSanityCheckBox.setSelected(false);
@@ -2519,9 +2522,6 @@ public class NewRandomizerGUI {
         thcFullCompatibilityRadioButton.setVisible(true);
         thcFullCompatibilityRadioButton.setEnabled(false);
         thcFullCompatibilityRadioButton.setSelected(false);
-        thcFullNormalCompatibilityRadioButton.setVisible(true);
-        thcFullNormalCompatibilityRadioButton.setEnabled(false);
-        thcFullNormalCompatibilityRadioButton.setSelected(false);
         mtUnchangedRadioButton.setVisible(true);
         mtUnchangedRadioButton.setEnabled(false);
         mtUnchangedRadioButton.setSelected(false);
@@ -2926,13 +2926,16 @@ public class NewRandomizerGUI {
             if (tmFullHMCompatibilityCheckBox.isVisible()) {
                 tmFullHMCompatibilityCheckBox.setEnabled(true);
             }
+            tmFullNormalHMCompatibilityCheckBox.setVisible(pokemonGeneration < 7);
+            if (tmFullNormalHMCompatibilityCheckBox.isVisible()) {
+                tmFullNormalHMCompatibilityCheckBox.setEnabled(true);
+            }
 
             thcUnchangedRadioButton.setEnabled(true);
             thcUnchangedRadioButton.setSelected(true);
             thcRandomPreferSameTypeRadioButton.setEnabled(true);
             thcRandomCompletelyRadioButton.setEnabled(true);
             thcFullCompatibilityRadioButton.setEnabled(true);
-            thcFullNormalCompatibilityRadioButton.setEnabled(true);
 
             if (romHandler.hasMoveTutors()) {
                 mtMovesPanel.setVisible(true);
@@ -3643,7 +3646,8 @@ public class NewRandomizerGUI {
             mtForceGoodDamagingSlider.setValue(mtForceGoodDamagingSlider.getMinimum());
         }
 
-        tmFullHMCompatibilityCheckBox.setEnabled(!thcFullCompatibilityRadioButton.isSelected() && !thcFullNormalCompatibilityRadioButton.isSelected());
+        tmFullHMCompatibilityCheckBox.setEnabled(!thcFullCompatibilityRadioButton.isSelected());
+        tmFullNormalHMCompatibilityCheckBox.setEnabled(thcFullCompatibilityRadioButton.isSelected());
 
         if (fiRandomRadioButton.isSelected() && fiRandomRadioButton.isVisible() && fiRandomRadioButton.isEnabled()) {
             fiBanBadItemsCheckBox.setEnabled(true);
