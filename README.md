@@ -19,7 +19,7 @@ Refer to Universal Pokemon Randomizer ZX instead, as this at the moment is just 
         2. Language level: `8 - Lambdas, type annotations etc.`
     2. Artifacts
         1. (+) > JAR > From modules with dependencies
-        2. Main Class: locate `com.dabomstew.pkrandom.newgui.NewRandomizerGUI`
+        2. Main Class: select the third option `NewRandomizerGUI` <kbd>(com.dabomstew.pkrandom.newgui.NewRandomizerGUI)</kbd>
         3. OK
     3. Select the new Artifact, 
         1. name: `PokeRandoZX:jar`
