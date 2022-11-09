@@ -25,4 +25,4 @@ Refer to Universal Pokemon Randomizer ZX instead, as this at the moment is just 
         1. name: `PokeRandoZX:jar`
         2. Output Directory: `[your path]\universal-pokemon-randomizer-t\launcher\`
         3. Rename jar as well to `PokeRandoZX.jar`
-6. Close, and now you probably can build from Build > Build Artifacts
+6. `Apply` - You can build through: Build > Build Artifacts
