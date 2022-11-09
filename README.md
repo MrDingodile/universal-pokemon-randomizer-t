@@ -22,13 +22,13 @@ Refer to Universal Pokemon Randomizer ZX instead, as this at the moment is just 
 5. File > Project Structure
     1. Project:
         1. SDK: locate the JDK you installed
-        2. Language level: 8 - Lambdas, type annotations etc.
+        2. Language level: `8 - Lambdas, type annotations etc.`
     2. Artifacts
         1. (+) > JAR > From modules with dependencies
-        2. Main Class: locate com.dabomstew.pkrandom.newgui.NewRandomizerGUI
+        2. Main Class: locate `com.dabomstew.pkrandom.newgui.NewRandomizerGUI`
         3. OK
     3. Select the new Artifact, 
-        1. name: PokeRandoZX:jar
-        2. Output Directory: [your path]\universal-pokemon-randomizer-t\launcher\
-        3. Rename jar as well to PokeRandoZX.jar
+        1. name: `PokeRandoZX:jar`
+        2. Output Directory: `[your path]\universal-pokemon-randomizer-t\launcher\`
+        3. Rename jar as well to `PokeRandoZX.jar`
 6. Close, and now you probably can build from Build > Build Artifacts
