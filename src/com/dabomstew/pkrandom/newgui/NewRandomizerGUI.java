@@ -1843,8 +1843,9 @@ public class NewRandomizerGUI {
                 thcRandomCompletelyRadioButton.isSelected(), thcFullCompatibilityRadioButton.isSelected());
         settings.setTmLevelUpMoveSanity(tmLevelupMoveSanityCheckBox.isSelected());
         settings.setKeepFieldMoveTMs(tmKeepFieldMoveTMsCheckBox.isSelected());
-        settings.setFullHMCompat(tmFullHMCompatibilityCheckBox.isSelected() && tmFullHMCompatibilityCheckBox.isVisible());
-        settings.setFullNormalHMCompat(tmFullNormalHMCompatibilityCheckBox.isSelected() && tmFullNormalHMCompatibilityCheckBox.isVisible());
+        boolean normalHMOnly = tmFullNormalHMCompatibilityCheckBox.isSelected() && tmFullNormalHMCompatibilityCheckBox.isVisible();
+        settings.setFullHMCompat(!normalHMOnly && tmFullHMCompatibilityCheckBox.isSelected() && tmFullHMCompatibilityCheckBox.isVisible());
+        settings.setFullNormalHMCompat(normalHMOnly);
         settings.setTmsForceGoodDamaging(tmForceGoodDamagingCheckBox.isSelected());
         settings.setTmsGoodDamagingPercent(tmForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenTMMoves(tmNoGameBreakingMovesCheckBox.isSelected());
@@ -3647,7 +3648,7 @@ public class NewRandomizerGUI {
         }
 
         tmFullHMCompatibilityCheckBox.setEnabled(!thcFullCompatibilityRadioButton.isSelected());
-        tmFullNormalHMCompatibilityCheckBox.setEnabled(thcFullCompatibilityRadioButton.isSelected());
+        tmFullNormalHMCompatibilityCheckBox.setEnabled(!thcFullCompatibilityRadioButton.isSelected());
 
         if (fiRandomRadioButton.isSelected() && fiRandomRadioButton.isVisible() && fiRandomRadioButton.isEnabled()) {
             fiBanBadItemsCheckBox.setEnabled(true);

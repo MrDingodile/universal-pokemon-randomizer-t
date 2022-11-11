@@ -4562,21 +4562,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         this.setTMHMCompatibility(compat);
     }
-    
-    @Override
-    public void fullNormalTMHMCompatibility() {
-        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
-        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            if(compatEntry.getKey().primaryType != Type.NORMAL){
-                continue;
-            }
-            boolean[] flags = compatEntry.getValue();
-            for (int i = 1; i < flags.length; i++) {
-                flags[i] = true;
-            }
-        }
-        this.setTMHMCompatibility(compat);
-    }
+
 
     @Override
     public void ensureTMCompatSanity() {
@@ -4624,6 +4610,23 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Set the new compatibility
+        this.setTMHMCompatibility(compat);
+    }
+
+
+    @Override
+    public void fullNormalHMCompatibility() {
+        Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
+        int tmCount = this.getTMCount();
+        for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
+            if(compatEntry.getKey().primaryType != Type.NORMAL){
+                continue;
+            }
+            boolean[] flags = compatEntry.getValue();
+            for (int i = tmCount + 1; i < flags.length; i++) {
+                flags[i] = true;
+            }
+        }
         this.setTMHMCompatibility(compat);
     }
 

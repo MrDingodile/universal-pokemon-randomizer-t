@@ -346,11 +346,7 @@ public class Randomizer {
                 tmsHmsCompatChanged = true;
                 break;
             case FULL:
-                if(settings.isFullNormalHMCompat()){
-                    romHandler.fullNormalTMHMCompatibility();
-                } else {
-                    romHandler.fullTMHMCompatibility();
-                }
+                romHandler.fullTMHMCompatibility();
                 tmsHmsCompatChanged = true;
                 break;
             default:
@@ -365,7 +361,11 @@ public class Randomizer {
             tmsHmsCompatChanged = true;
         }
 
-        if (settings.isFullHMCompat()) {
+        if (settings.isFullNormalHMCompat()) {
+            romHandler.fullNormalHMCompatibility();
+            tmsHmsCompatChanged = true;
+
+        } else if (settings.isFullHMCompat()) {
             romHandler.fullHMCompatibility();
             tmsHmsCompatChanged = true;
         }

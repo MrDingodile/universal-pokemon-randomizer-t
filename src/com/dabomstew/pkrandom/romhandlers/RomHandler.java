@@ -409,6 +409,8 @@ public interface RomHandler {
 
     void fullHMCompatibility();
 
+    void fullNormalHMCompatibility();
+
     // ===========
     // Move Tutors
     // ===========
