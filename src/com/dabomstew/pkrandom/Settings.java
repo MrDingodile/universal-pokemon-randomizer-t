@@ -210,6 +210,10 @@ public class Settings {
     private boolean balanceShakingGrass;
     private boolean wildLevelsModified;
     private int wildLevelModifier = 0;
+
+    private boolean useWildTypeModifier;
+    private int wildTypeModifier = 0;
+    private int wildTypePercentage = 0;
     private boolean allowWildAltFormes;
 
     public enum StaticPokemonMod {
@@ -1857,6 +1861,24 @@ public class Settings {
     public void setWildLevelModifier(int wildLevelModifier) {
         this.wildLevelModifier = wildLevelModifier;
     }
+
+    public boolean useWildTypeModifier() {
+        return useWildTypeModifier;
+    }
+
+    public void setUseWildTypeModifier(boolean useWildTypeModifier) { this.useWildTypeModifier = useWildTypeModifier; }
+
+    public int getWildTypeModifier() {
+        return wildTypeModifier;
+    }
+
+    public void setWildTypeModifier(int wildTypeModifier) { this.wildTypeModifier = wildTypeModifier; }
+
+    public int getWildTypePercentage() {
+        return wildTypePercentage;
+    }
+
+    public void setWildTypePercentage(int wildTypePercentage) { this.wildTypePercentage = wildTypePercentage; }
 
     public boolean isAllowWildAltFormes() {
         return allowWildAltFormes;

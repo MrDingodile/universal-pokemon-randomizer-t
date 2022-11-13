@@ -35,6 +35,7 @@ import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
+import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
@@ -301,8 +302,8 @@ public class NewRandomizerGUI {
     private JCheckBox paEnsureTwoAbilitiesCheckbox;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
     private JCheckBox wpPercentageTypeCheckBox;
-    private JSlider wpPercentageTypeSlider;
     private JComboBox wpPercentageTypeComboBox;
+    private JSlider wpPercentageTypeSlider;
 
     private static JFrame frame;
 
@@ -1606,6 +1607,9 @@ public class NewRandomizerGUI {
         wpPercentageLevelModifierCheckBox.setSelected(settings.isWildLevelsModified());
         wpPercentageLevelModifierSlider.setValue(settings.getWildLevelModifier());
         wpAllowAltFormesCheckBox.setSelected(settings.isAllowWildAltFormes());
+        wpPercentageTypeCheckBox.setSelected(settings.useWildTypeModifier());
+        wpPercentageTypeComboBox.setSelectedIndex(Math.max(0,settings.getWildTypeModifier()));//add min for not exceeding gen?
+        wpPercentageTypeSlider.setValue(settings.getWildTypePercentage());
 
         stpUnchangedRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
         stpSwapLegendariesSwapStandardsRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
@@ -1829,6 +1833,9 @@ public class NewRandomizerGUI {
         settings.setWildLevelsModified(wpPercentageLevelModifierCheckBox.isSelected());
         settings.setWildLevelModifier(wpPercentageLevelModifierSlider.getValue());
         settings.setAllowWildAltFormes(wpAllowAltFormesCheckBox.isSelected() && wpAllowAltFormesCheckBox.isVisible());
+        settings.setUseWildTypeModifier(wpPercentageTypeCheckBox.isSelected() && wpPercentageTypeCheckBox.isVisible());
+        settings.setWildTypeModifier(wpPercentageTypeComboBox.getSelectedIndex());
+        settings.setWildTypePercentage(wpPercentageTypeSlider.getValue());
 
         settings.setStaticPokemonMod(stpUnchangedRadioButton.isSelected(), stpSwapLegendariesSwapStandardsRadioButton.isSelected(),
                 stpRandomCompletelyRadioButton.isSelected(), stpRandomSimilarStrengthRadioButton.isSelected());
@@ -2484,6 +2491,15 @@ public class NewRandomizerGUI {
         wpAllowAltFormesCheckBox.setVisible(true);
         wpAllowAltFormesCheckBox.setEnabled(false);
         wpAllowAltFormesCheckBox.setSelected(false);
+        wpPercentageTypeCheckBox.setVisible(true);
+        wpPercentageTypeCheckBox.setEnabled(false);
+        wpPercentageTypeCheckBox.setSelected(false);
+        wpPercentageTypeComboBox.setVisible(true);
+        wpPercentageTypeComboBox.setEnabled(true);
+        wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "Normal" }));
+        wpPercentageTypeSlider.setVisible(true);
+        wpPercentageTypeSlider.setEnabled(false);
+        wpPercentageTypeSlider.setValue(wpPercentageTypeSlider.getMinimum());
         tmUnchangedRadioButton.setVisible(true);
         tmUnchangedRadioButton.setEnabled(false);
         tmUnchangedRadioButton.setSelected(false);
@@ -2922,6 +2938,9 @@ public class NewRandomizerGUI {
             wpBalanceShakingGrassPokemonCheckBox.setVisible(pokemonGeneration == 5);
             wpPercentageLevelModifierCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setVisible(romHandler.hasWildAltFormes());
+            wpPercentageTypeCheckBox.setEnabled(true);
+            wpPercentageTypeComboBox.setEnabled(false);
+            wpPercentageTypeSlider.setEnabled(false);
 
             tmUnchangedRadioButton.setEnabled(true);
             tmUnchangedRadioButton.setSelected(true);
@@ -3515,6 +3534,9 @@ public class NewRandomizerGUI {
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
         }
+        wpPercentageTypeCheckBox.setEnabled(true);
+        wpPercentageTypeComboBox.setEnabled(wpPercentageTypeCheckBox.isEnabled() && wpPercentageTypeCheckBox.isSelected());
+        wpPercentageTypeSlider.setEnabled(wpPercentageTypeCheckBox.isEnabled() && wpPercentageTypeCheckBox.isSelected());
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()
                 && wpRandomizeHeldItemsCheckBox.isVisible()
@@ -3801,6 +3823,20 @@ public class NewRandomizerGUI {
                 return comp;
             }
         });
+
+        Type[] types = new Type[Type.SIZE];
+        j = 0;
+        for (int i = 0; i < types.length; i++) {
+            Type t = Type.getType(j);
+            if(romHandler.typeInGame(t)) {
+                types[i] = t;
+                j++;
+            }
+        }
+        Type[] typesInGame = new Type[j];
+        System.arraycopy(types, 0, typesInGame, 0, j);
+
+        wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(typesInGame));
     }
 
     private ImageIcon makeMascotIcon() {
