@@ -455,6 +455,7 @@ public class NewRandomizerGUI {
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpPercentageTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tmUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmForceGoodDamagingCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -3535,8 +3536,14 @@ public class NewRandomizerGUI {
             wpAllowAltFormesCheckBox.setEnabled(true);
         }
         wpPercentageTypeCheckBox.setEnabled(true);
-        wpPercentageTypeComboBox.setEnabled(wpPercentageTypeCheckBox.isEnabled() && wpPercentageTypeCheckBox.isSelected());
-        wpPercentageTypeSlider.setEnabled(wpPercentageTypeCheckBox.isEnabled() && wpPercentageTypeCheckBox.isSelected());
+
+        if (wpPercentageTypeCheckBox.isSelected()) {
+            wpPercentageTypeComboBox.setEnabled(true);
+            wpPercentageTypeSlider.setEnabled(true);
+        } else {
+            wpPercentageTypeComboBox.setEnabled(false);
+            wpPercentageTypeSlider.setEnabled(false);
+        }
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()
                 && wpRandomizeHeldItemsCheckBox.isVisible()
