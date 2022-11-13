@@ -300,6 +300,9 @@ public class NewRandomizerGUI {
     private JCheckBox tpBetterMovesetsCheckBox;
     private JCheckBox paEnsureTwoAbilitiesCheckbox;
     private JCheckBox miscUpdateRotomFormeTypingCheckBox;
+    private JCheckBox wpPercentageTypeCheckBox;
+    private JSlider wpPercentageTypeSlider;
+    private JComboBox wpPercentageTypeComboBox;
 
     private static JFrame frame;
 

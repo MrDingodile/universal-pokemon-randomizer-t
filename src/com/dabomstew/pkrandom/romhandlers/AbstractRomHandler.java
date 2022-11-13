@@ -680,6 +680,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean catchEmAll = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.CATCH_EM_ALL;
         boolean typeThemed = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.TYPE_THEME_AREAS;
         boolean usePowerLevels = settings.getWildPokemonRestrictionMod() == Settings.WildPokemonRestrictionMod.SIMILAR_STRENGTH;
+        //spec amount
         boolean noLegendaries = settings.isBlockWildLegendaries();
         boolean balanceShakingGrass = settings.isBalanceShakingGrass();
         int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
