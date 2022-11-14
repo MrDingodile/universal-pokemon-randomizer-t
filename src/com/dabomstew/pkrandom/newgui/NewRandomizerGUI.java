@@ -413,6 +413,7 @@ public class NewRandomizerGUI {
         }).run();
 
         frame.setTitle(String.format(bundle.getString("GUI.windowTitle"),Version.VERSION_STRING));
+        frame.setIconImage(new ImageIcon(getClass().getResource("/com/dabomstew/pkrandom/newgui/launcherIcon.png")).getImage());
 
         openROMButton.addActionListener(e -> loadROM());
         pbsUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -3854,10 +3855,11 @@ public class NewRandomizerGUI {
                 return emptyIcon;
             }
 
-            BufferedImage nImg = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+            int res = 128;
+            BufferedImage nImg = new BufferedImage(res, res, BufferedImage.TYPE_INT_ARGB);
             int hW = handlerImg.getWidth();
             int hH = handlerImg.getHeight();
-            nImg.getGraphics().drawImage(handlerImg, 64 - hW / 2, 64 - hH / 2, frame);
+            nImg.getGraphics().drawImage(handlerImg, (res/2) - (hW/2), (res/2) - (hH/2), frame);
             return new ImageIcon(nImg);
         } catch (Exception ex) {
             return emptyIcon;
