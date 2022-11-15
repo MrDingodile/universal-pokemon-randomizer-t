@@ -457,6 +457,10 @@ public class NewRandomizerGUI {
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageTypeCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpARTypeThemeAreasRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpARCatchEmAllModeRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpARNoneRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        wpARSimilarStrengthRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmForceGoodDamagingCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -3536,9 +3540,10 @@ public class NewRandomizerGUI {
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
         }
-        wpPercentageTypeCheckBox.setEnabled(true);
+        wpPercentageTypeCheckBox.setEnabled((wpUnchangedRadioButton.isSelected() || wpRandomRadioButton.isSelected() || wpArea1To1RadioButton.isSelected())
+        && (!wpARCatchEmAllModeRadioButton.isSelected() && !wpARTypeThemeAreasRadioButton.isSelected()));
 
-        if (wpPercentageTypeCheckBox.isSelected()) {
+        if (wpPercentageTypeCheckBox.isEnabled() && wpPercentageTypeCheckBox.isSelected()) {
             wpPercentageTypeComboBox.setEnabled(true);
             wpPercentageTypeSlider.setEnabled(true);
         } else {
@@ -3835,18 +3840,20 @@ public class NewRandomizerGUI {
         Type[] types = new Type[Type.SIZE];
         j = 0;
         for (int i = 0; i < types.length; i++) {
-            Type t = Type.getType(j);
-            if(romHandler.typeInGame(t) && t != Type.NORMAL) {
-                types[i] = t;
+            Type t = Type.getType(i);
+            if(romHandler.typeInGame(t)) {
+                if(t == Type.NORMAL){
+                    continue;
+                }
+                types[j] = t;
                 j++;
             }
         }
         Type[] typesInGame = new Type[j];
         System.arraycopy(types, 0, typesInGame, 0, j);
 
-
-        wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(typesInGame));
         romHandler.setTypesInGame(typesInGame);
+        wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
     }
 
     private ImageIcon makeMascotIcon() {
