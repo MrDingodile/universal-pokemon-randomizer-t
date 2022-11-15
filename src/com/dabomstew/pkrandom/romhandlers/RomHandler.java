@@ -660,4 +660,8 @@ public interface RomHandler {
     List<Pokemon> getBannedFormesForPlayerPokemon();
 
     List<Pokemon> getBannedFormesForTrainerPokemon();
+
+    Type[] getTypesInGame();
+
+    void setTypesInGame(Type[] t);
 }
