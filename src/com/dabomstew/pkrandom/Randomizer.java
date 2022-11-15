@@ -589,7 +589,10 @@ public class Randomizer {
                 wildsChanged = true;
                 break;
             default:
-                if (settings.isWildLevelsModified()) {
+                if (settings.useWildTypeModifier()){
+                    romHandler.onlyChangeWildTypeAndLevels(settings);
+                    wildsChanged = true;
+                } else if (settings.isWildLevelsModified()) {
                     romHandler.onlyChangeWildLevels(settings);
                     wildsChanged = true;
                 }

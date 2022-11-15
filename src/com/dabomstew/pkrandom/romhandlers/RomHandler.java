@@ -223,6 +223,8 @@ public interface RomHandler {
 
     void game1to1Encounters(Settings settings);
 
+    void onlyChangeWildTypeAndLevels(Settings settings);
+
     void onlyChangeWildLevels(Settings settings);
 
     boolean hasTimeBasedEncounters();

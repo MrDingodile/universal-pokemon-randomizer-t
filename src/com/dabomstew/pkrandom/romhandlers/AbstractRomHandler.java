@@ -1079,13 +1079,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                     localAllowed.removeAll(area.bannedPokemon);
                 }
 
+                int typeIndex = this.random.nextInt(inArea.size());
+                int p = 0;
                 for (Pokemon areaPk : inArea) {
-                    Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100, settings, false);
+                    boolean rollTypeChance = p == typeIndex;
+                    Pokemon picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100, settings, rollTypeChance);
                     while (picked.actuallyCosmetic) {
                         picked = pickWildPowerLvlReplacement(localAllowed, areaPk, false, usedPks, 100, settings, false);
                     }
                     areaMap.put(areaPk, picked);
                     usedPks.add(picked);
+                    p++;
                 }
                 for (Encounter enc : area.encounters) {
                     // Apply the map
@@ -1107,7 +1111,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     boolean rollTypeChance = p == typeIndex;
                     Pokemon picked = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned, settings, rollTypeChance);
                     while (areaMap.containsValue(picked)) {
-                        picked = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned, settings, rollTypeChance);
+                        picked = pickEntirelyRandomPokemon(allowAltFormes, noLegendaries, area, banned, settings, false);
                     }
                     areaMap.put(areaPk, picked);
                     p++;
@@ -1259,6 +1263,31 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         setEncounters(useTimeOfDay, currentEncounters);
 
+    }
+
+    @Override
+    public void onlyChangeWildTypeAndLevels(Settings settings) {
+        int levelModifier = settings.isWildLevelsModified() ? settings.getWildLevelModifier() : 0;
+        List<EncounterSet> currentEncounters = this.getEncounters(true);
+
+        if (levelModifier != 0) {
+            for (EncounterSet area : currentEncounters) {
+                int typeIndex = this.random.nextInt(area.encounters.size());
+                int e = 0;
+                for (Encounter enc : area.encounters) {
+                    boolean rollTypeChance = e == typeIndex;
+                    if(rollTypeChance && useTypeChance(settings)) {
+                        enc.pokemon = getRandomPokemon(false, false, area, null, settings, true);
+                        setFormeForEncounter(enc, enc.pokemon);
+                    }
+
+                    enc.level = Math.min(100, (int) Math.round(enc.level * (1 + levelModifier / 100.0)));
+                    enc.maxLevel = Math.min(100, (int) Math.round(enc.maxLevel * (1 + levelModifier / 100.0)));
+                    e++;
+                }
+            }
+            setEncounters(true, currentEncounters);
+        }
     }
 
     @Override
@@ -6926,8 +6955,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private Type useTypeChance(Settings settings){
-        Type type = getTypesInGame()[settings.getWildTypeModifier()];
+    private boolean useTypeChance(Settings settings){
         int typePct = settings.getWildTypePercentage();
         boolean useType = false;
         if(settings.useWildTypeModifier()){
@@ -6936,9 +6964,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         if(!useType){
-            return Type.NORMAL;
+            return false;
         }
-        return type;
+        return true;
     }
 
     private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
@@ -6946,8 +6974,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         // start with within 10% and add 5% either direction till we find
         // something
 
-        Type type = useTypeChance(settings);
-        useType = useType && type != Type.NORMAL;
+        Type type = getTypesInGame()[settings.getWildTypeModifier()];
+        useType = useType && useTypeChance(settings);
 
         int balancedBST = bstBalanceLevel * 10 + 250;
         int currentBST = Math.min(current.bstForPowerLevels(), balancedBST);
@@ -6967,6 +6995,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             minTarget -= currentBST / 20;
             maxTarget += currentBST / 20;
             expandRounds++;
+            if(useType && expandRounds >= 20){
+                useType = false;
+                expandRounds = 0;
+                minTarget += currentBST;
+                maxTarget -= currentBST;
+            }
         }
         return canPick.get(this.random.nextInt(canPick.size()));
     }
@@ -7001,20 +7035,23 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     public Pokemon pickEntirelyRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterSet area, List<Pokemon> banned, Settings settings, boolean useType) {
-        Type type = useTypeChance(settings);
-        useType = useType && type != Type.NORMAL;
+        useType = useType && useTypeChance(settings);
+        return getRandomPokemon(includeFormes,noLegendaries,area,banned,settings,useType);
+    }
 
+    public Pokemon getRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterSet area, List<Pokemon> banned, Settings settings, boolean useType) {
+        Type type = getTypesInGame()[settings.getWildTypeModifier()];
         Pokemon result;
         Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
         Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
         result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
-        while (result.actuallyCosmetic) {
+        while (result.actuallyCosmetic
+           || (useType && result.primaryType != type && result.secondaryType != type) ) {
             randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
             randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
             result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;
         }
-        while (banned.contains(result) || area.bannedPokemon.contains(result)
-           || (useType && result.primaryType != type && result.secondaryType != type)) {
+        while (banned.contains(result) || area.bannedPokemon.contains(result)) {
             randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
             randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();
             result = noLegendaries ? randomNonLegendaryPokemon : randomPokemon;

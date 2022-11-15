@@ -3836,13 +3836,14 @@ public class NewRandomizerGUI {
         j = 0;
         for (int i = 0; i < types.length; i++) {
             Type t = Type.getType(j);
-            if(romHandler.typeInGame(t)) {
+            if(romHandler.typeInGame(t) && t != Type.NORMAL) {
                 types[i] = t;
                 j++;
             }
         }
         Type[] typesInGame = new Type[j];
         System.arraycopy(types, 0, typesInGame, 0, j);
+
 
         wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(typesInGame));
         romHandler.setTypesInGame(typesInGame);
