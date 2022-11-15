@@ -3845,6 +3845,7 @@ public class NewRandomizerGUI {
         System.arraycopy(types, 0, typesInGame, 0, j);
 
         wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(typesInGame));
+        romHandler.setTypesInGame(typesInGame);
     }
 
     private ImageIcon makeMascotIcon() {
