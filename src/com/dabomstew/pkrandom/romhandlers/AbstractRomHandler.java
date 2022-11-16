@@ -842,6 +842,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     localAllowed = new ArrayList<>(allowedPokes);
                     localAllowed.removeAll(area.bannedPokemon);
                 }
+
                 int typeIndex = this.random.nextInt(area.encounters.size());
                 int e = 0;
                 for (Encounter enc : area.encounters) {
@@ -850,20 +851,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                         if (area.displayName.contains("Shaking")) {
                             enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2, settings, rollTypeChance);
                             while (enc.pokemon.actuallyCosmetic) {
-                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2, settings, rollTypeChance);
+                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, (enc.level + enc.maxLevel) / 2, settings, false);
                             }
                             setFormeForEncounter(enc, enc.pokemon);
                         } else {
                             enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null,100 , settings, rollTypeChance);
                             while (enc.pokemon.actuallyCosmetic) {
-                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100, settings, rollTypeChance);
+                                enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100, settings, false);
                             }
                             setFormeForEncounter(enc, enc.pokemon);
                         }
                     } else {
                         enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100, settings, rollTypeChance);
                         while (enc.pokemon.actuallyCosmetic) {
-                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100, settings, rollTypeChance);
+                            enc.pokemon = pickWildPowerLvlReplacement(localAllowed, enc.pokemon, false, null, 100, settings, false);
                         }
                         setFormeForEncounter(enc, enc.pokemon);
                     }
