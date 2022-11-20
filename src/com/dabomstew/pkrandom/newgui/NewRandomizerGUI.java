@@ -304,6 +304,8 @@ public class NewRandomizerGUI {
     private JCheckBox wpPercentageTypeCheckBox;
     private JComboBox wpPercentageTypeComboBox;
     private JSlider wpPercentageTypeSlider;
+    private JComboBox spTypeComboBox;
+    private JRadioButton spTypeRadioButton;
 
     private static JFrame frame;
 
@@ -432,6 +434,7 @@ public class NewRandomizerGUI {
         spCustomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomTwoEvosRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpSwapLegendariesSwapStandardsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -1510,6 +1513,8 @@ public class NewRandomizerGUI {
         spRandomCompletelyRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.COMPLETELY_RANDOM);
         spUnchangedRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.UNCHANGED);
         spRandomTwoEvosRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.RANDOM_WITH_TWO_EVOLUTIONS);
+        spTypeRadioButton.setSelected(settings.getStartersMod() == Settings.StartersMod.TYPE_ADVANCED);
+        spTypeComboBox.setSelectedIndex(Math.max(0,settings.getStartersType()));//todo: add min for not exceeding gen?
         spRandomizeStarterHeldItemsCheckBox.setSelected(settings.isRandomizeStartersHeldItems());
         spBanBadItemsCheckBox.setSelected(settings.isBanBadRandomStarterHeldItems());
         spAllowAltFormesCheckBox.setSelected(settings.isAllowStarterAltFormes());
@@ -1613,8 +1618,8 @@ public class NewRandomizerGUI {
         wpPercentageLevelModifierCheckBox.setSelected(settings.isWildLevelsModified());
         wpPercentageLevelModifierSlider.setValue(settings.getWildLevelModifier());
         wpAllowAltFormesCheckBox.setSelected(settings.isAllowWildAltFormes());
-        wpPercentageTypeCheckBox.setSelected(settings.useWildTypeModifier());
-        wpPercentageTypeComboBox.setSelectedIndex(Math.max(0,settings.getWildTypeModifier()));//add min for not exceeding gen?
+        wpPercentageTypeCheckBox.setSelected(settings.useWildType());
+        wpPercentageTypeComboBox.setSelectedIndex(Math.max(0,settings.getWildType()));//add min for not exceeding gen?
         wpPercentageTypeSlider.setValue(settings.getWildTypePercentage());
 
         stpUnchangedRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
@@ -1755,7 +1760,8 @@ public class NewRandomizerGUI {
         settings.setRemoveTimeBasedEvolutions(peRemoveTimeBasedEvolutionsCheckBox.isSelected());
 
         settings.setStartersMod(spUnchangedRadioButton.isSelected(), spCustomRadioButton.isSelected(), spRandomCompletelyRadioButton.isSelected(),
-                spRandomTwoEvosRadioButton.isSelected());
+                spRandomTwoEvosRadioButton.isSelected(), spTypeRadioButton.isSelected());
+        settings.setStartersType(spTypeComboBox.getSelectedIndex());
         settings.setRandomizeStartersHeldItems(spRandomizeStarterHeldItemsCheckBox.isSelected() && spRandomizeStarterHeldItemsCheckBox.isVisible());
         settings.setBanBadRandomStarterHeldItems(spBanBadItemsCheckBox.isSelected() && spBanBadItemsCheckBox.isVisible());
         settings.setAllowStarterAltFormes(spAllowAltFormesCheckBox.isSelected() && spAllowAltFormesCheckBox.isVisible());
@@ -1839,8 +1845,8 @@ public class NewRandomizerGUI {
         settings.setWildLevelsModified(wpPercentageLevelModifierCheckBox.isSelected());
         settings.setWildLevelModifier(wpPercentageLevelModifierSlider.getValue());
         settings.setAllowWildAltFormes(wpAllowAltFormesCheckBox.isSelected() && wpAllowAltFormesCheckBox.isVisible());
-        settings.setUseWildTypeModifier(wpPercentageTypeCheckBox.isSelected() && wpPercentageTypeCheckBox.isVisible());
-        settings.setWildTypeModifier(wpPercentageTypeComboBox.getSelectedIndex());
+        settings.setUseWildType(wpPercentageTypeCheckBox.isSelected() && wpPercentageTypeCheckBox.isVisible());
+        settings.setWildType(wpPercentageTypeComboBox.getSelectedIndex());
         settings.setWildTypePercentage(wpPercentageTypeSlider.getValue());
 
         settings.setStaticPokemonMod(stpUnchangedRadioButton.isSelected(), stpSwapLegendariesSwapStandardsRadioButton.isSelected(),
@@ -2175,6 +2181,9 @@ public class NewRandomizerGUI {
         spRandomTwoEvosRadioButton.setVisible(true);
         spRandomTwoEvosRadioButton.setEnabled(false);
         spRandomTwoEvosRadioButton.setSelected(false);
+        spTypeRadioButton.setVisible(true);
+        spTypeRadioButton.setEnabled(false);
+        spTypeRadioButton.setSelected(false);
         spComboBox1.setVisible(true);
         spComboBox1.setEnabled(false);
         spComboBox1.setSelectedIndex(0);
@@ -2187,6 +2196,10 @@ public class NewRandomizerGUI {
         spComboBox3.setEnabled(false);
         spComboBox3.setSelectedIndex(0);
         spComboBox3.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
+        spTypeComboBox.setVisible(true);
+        spTypeComboBox.setEnabled(false);
+        spTypeComboBox.setSelectedIndex(0);
+        spTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
         spRandomizeStarterHeldItemsCheckBox.setVisible(true);
         spRandomizeStarterHeldItemsCheckBox.setEnabled(false);
         spRandomizeStarterHeldItemsCheckBox.setSelected(false);
@@ -2785,9 +2798,12 @@ public class NewRandomizerGUI {
             spCustomRadioButton.setEnabled(true);
             spRandomCompletelyRadioButton.setEnabled(true);
             spRandomTwoEvosRadioButton.setEnabled(true);
+            spTypeRadioButton.setEnabled(true);
+            wpPercentageTypeComboBox.setEnabled(false);
             spAllowAltFormesCheckBox.setVisible(romHandler.hasStarterAltFormes());
             if (romHandler.isYellow()) {
                 spComboBox3.setVisible(false);
+                spTypeRadioButton.setVisible(false);
             }
             populateDropdowns();
 
@@ -3101,8 +3117,10 @@ public class NewRandomizerGUI {
                 ptRandomCompletelyRadioButton.setSelected(true);
             }
             spRandomTwoEvosRadioButton.setEnabled(false);
+            spTypeRadioButton.setEnabled(false);
             if (spRandomTwoEvosRadioButton.isSelected()) {
                 spRandomTwoEvosRadioButton.setSelected(false);
+                spTypeRadioButton.setSelected(false);
                 spRandomCompletelyRadioButton.setSelected(true);
             }
             paFollowEvolutionsCheckBox.setSelected(false);
@@ -3135,6 +3153,7 @@ public class NewRandomizerGUI {
             // except this one, so manually enable it again.
             ptRandomFollowEvolutionsRadioButton.setEnabled(true);
             spRandomTwoEvosRadioButton.setEnabled(true);
+            spTypeRadioButton.setEnabled(true);
 
             // The controls that make evolutions easier/possible, however,
             // need to all be manually re-enabled.
@@ -3269,6 +3288,12 @@ public class NewRandomizerGUI {
         } else {
             spBanBadItemsCheckBox.setEnabled(false);
             spBanBadItemsCheckBox.setSelected(false);
+        }
+
+        if (spTypeRadioButton.isEnabled() && spTypeRadioButton.isSelected()) {
+            spTypeComboBox.setEnabled(true);
+        } else {
+            spTypeComboBox.setEnabled(false);
         }
 
         if (stpUnchangedRadioButton.isSelected()) {
@@ -3854,6 +3879,7 @@ public class NewRandomizerGUI {
 
         romHandler.setTypesInGame(typesInGame);
         wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
+        spTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
     }
 
     private ImageIcon makeMascotIcon() {

@@ -126,6 +126,8 @@ public interface RomHandler {
 
     void randomizeBasicTwoEvosStarters(Settings settings);
 
+    void randomizeStartersOfType(Type type, Settings settings);
+
     List<Pokemon> getPickedStarters();
 
     boolean supportsStarterHeldItems();

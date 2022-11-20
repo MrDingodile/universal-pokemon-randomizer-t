@@ -39,7 +39,6 @@ import java.util.zip.CRC32;
 import com.dabomstew.pkrandom.pokemon.ExpCurve;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
 import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen2RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
@@ -101,7 +100,7 @@ public class Settings {
     private boolean ensureTwoAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, TYPE_ADVANCED
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -114,6 +113,7 @@ public class Settings {
     private boolean limitMainGameLegendaries;
     private boolean limit600;
     private boolean banBadRandomStarterHeldItems;
+    private int startersType;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
@@ -391,7 +391,7 @@ public class Settings {
 
         // 4: starter pokemon stuff
         out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
-                startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
+                startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS, startersMod == StartersMod.TYPE_ADVANCED,
                 randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
 
         // 5 - 10: dropdowns
@@ -1354,6 +1354,12 @@ public class Settings {
         this.allowStarterAltFormes = allowStarterAltFormes;
     }
 
+    public int getStartersType() {
+        return startersType;
+    }
+    public void setStartersType(int t){
+        startersType = t;
+    }
     
     public TypesMod getTypesMod() {
         return typesMod;
@@ -1863,17 +1869,17 @@ public class Settings {
         this.wildLevelModifier = wildLevelModifier;
     }
 
-    public boolean useWildTypeModifier() {
+    public boolean useWildType() {
         return useWildTypeModifier;
     }
 
-    public void setUseWildTypeModifier(boolean useWildTypeModifier) { this.useWildTypeModifier = useWildTypeModifier; }
+    public void setUseWildType(boolean useWildTypeModifier) { this.useWildTypeModifier = useWildTypeModifier; }
 
-    public int getWildTypeModifier() {
+    public int getWildType() {
         return wildTypeModifier;
     }
 
-    public void setWildTypeModifier(int wildTypeModifier) { this.wildTypeModifier = wildTypeModifier; }
+    public void setWildType(int wildType) { this.wildTypeModifier = wildType; }
 
     public int getWildTypePercentage() {
         return wildTypePercentage;

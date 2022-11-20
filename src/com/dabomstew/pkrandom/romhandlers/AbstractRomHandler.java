@@ -692,8 +692,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isAllowWildAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
-        boolean useTypePct = settings.useWildTypeModifier();
-        Type type = getTypesInGame()[settings.getWildTypeModifier()];
+        boolean useTypePct = settings.useWildType();
+        Type type = getTypesInGame()[settings.getWildType()];
 
         List<EncounterSet> currentEncounters = this.getEncounters(useTimeOfDay);
 
@@ -4024,11 +4024,220 @@ public abstract class AbstractRomHandler implements RomHandler {
         setStarters(pickedStarters);
     }
 
+    public void randomizeStartersOfType(Type type, Settings settings) {
+        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
+        boolean allowAltFormes = settings.isAllowStarterAltFormes();
+        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
+        int starterCount = starterCount();
+
+        List<Pokemon> unique = new ArrayList<>();
+        List<Pokemon> weighted = new ArrayList<>();
+        //create banned list
+        List<Pokemon> banned = getBannedFormesForPlayerPokemon();
+        if (abilitiesUnchanged) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
+        if (banIrregularAltFormes) {
+            banned.addAll(getIrregularFormes());
+        }
+        //get all pokemon
+        List<Pokemon> allPokes =
+                allowAltFormes ?
+                        this.getPokemonInclFormes()
+                                .stream()
+                                .filter(pk -> pk != null && !pk.actuallyCosmetic)
+                                .collect(Collectors.toList()) :
+                        this.getPokemon().stream()
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList());
+        Type[] allowedSecondaries = new Type[] { Type.NORMAL };
+        //create a pool of all 2+ evolution pokemon of pure type
+        for (Pokemon pk : allPokes) {
+            if(!banned.contains(pk)) {
+                int weight = getStarterWeight(pk, type, allowedSecondaries);
+                if(weight > 0) {
+                    unique.add(pk);
+                    for(int i=0; i<weight; i++) {
+                        weighted.add(pk);
+                    }
+                }
+            }
+        }
+        //we couldn't get a nice pool to randomise starts from so extent accepted types
+        if(unique.size() < starterCount * 2.5){
+            allowedSecondaries = getSecondariesForType(type);
+            for (Pokemon pk : allPokes) {
+                if(!banned.contains(pk)) {
+                    int weight = getStarterWeight(pk, type, allowedSecondaries) / 2;
+                    if(weight > 0) {
+                        unique.add(pk);
+                        for(int i=0; i<weight; i++) {
+                            weighted.add(pk);
+                        }
+                    }
+                }
+            }
+        }
+        int size = unique.size();
+        //even with the added range pool is less than the required starters so fill it with very plain normal types
+        if(size < starterCount){
+            List<Pokemon> normalPadding = new ArrayList<>();
+            for (Pokemon pk : allPokes) {
+                switch(pk.number){
+                    case Species.rattata:
+                    case Species.eevee:
+                    case Species.zigzagoon:
+                    case Species.bidoof:
+                    case Species.lillipup:
+                        normalPadding.add(pk);
+                        break;
+                }
+            }
+            for(int i = 0; i < starterCount - size; i++) {
+                Pokemon pk = normalPadding.get(random.nextInt(normalPadding.size()));
+                unique.add(pk);
+                weighted.add(pk);
+            }
+        }
+        //randomise starters
+        pickedStarters = new ArrayList<>();
+        for(int i = 0; i < starterCount; i++) {
+            Pokemon pk = weighted.get(random.nextInt(weighted.size()));
+            pickedStarters.add(pk);
+            while( weighted.contains(pk)){
+                weighted.remove(pk);
+            }
+            unique.remove(pk);
+        }
+        setStarters(pickedStarters);
+    }
+
+    private int getStarterWeight(Pokemon pk, Type type, Type[] allowedSecondaries){
+        if(IsBasic(pk)) {
+            int evos = CountEvos(pk, type, allowedSecondaries);
+            int baseStats = getFullEvolutionStats(pk, type, allowedSecondaries);
+            if (evos >= 2) {
+                if(baseStats < 601) {
+                    if (baseStats > 474 && baseStats < 535) {
+                        return 5;
+                    }
+                    return 3;
+                }
+            } else if(evos == 1){
+                if(baseStats < 601) {
+                    if (baseStats > 474 && baseStats < 535) {
+                        return 2;
+                    }
+                    return  1;
+                }
+            }
+        }
+        return 0;
+    }
+    private int getFullEvolutionStats(Pokemon pk, Type t, Type[] allowedSecondaries) {
+        if(HasType(pk, t, allowedSecondaries)) {
+            if (HasEvolution(pk)) {
+                int avg = 0;
+                int size = pk.evolutionsFrom.size();
+                for (Evolution ev : pk.evolutionsFrom) {
+                    int pow = getFullEvolutionStats(ev.to, t, new Type[0]);
+                    if(pow > 0) {
+                        avg += pow;
+                    } else {
+                        size--;
+                    }
+                }
+                avg /= size;
+                return avg;
+            }
+            return pk.bstForPowerLevels();
+        }
+        return 0;
+    }
+    private int CountEvos(Pokemon pk, Type t, Type[] allowedSecondaries) {
+        //to do: avoid stack overflow if pk has already been travelled
+        if(HasType(pk, t, allowedSecondaries)) {
+            if (HasEvolution(pk)) {
+                int c = 1, max = -10;
+                //recurse to see how far it goes
+                for (Evolution ev : pk.evolutionsFrom) {
+                    max = Math.max(max, CountEvos(ev.to, t, new Type[0]));
+                }
+                c += max;
+                return c;
+            }
+            return 0;
+        }
+        return -10;
+    }
+    private boolean HasType(Pokemon pk, Type t, Type[] allowedSecondaries) {
+        boolean hasSecondary = pk.secondaryType != null;
+        boolean isType = pk.primaryType == t || (hasSecondary && pk.secondaryType == t);
+        if(hasSecondary && allowedSecondaries.length > 0) {
+            boolean secondaryAllowed = false;
+            for (Type other : allowedSecondaries) {
+                secondaryAllowed = pk.primaryType == other || pk.secondaryType == other;
+            }
+            return isType && secondaryAllowed;
+        }
+        return isType;
+    }
+    public boolean IsEvolution(Pokemon pk) {
+        return pk.evolutionsTo.size() > 0;
+    }
+    public boolean HasEvolution(Pokemon pk) {
+        return pk.evolutionsFrom.size() > 0;
+    }
+    public boolean FullyEvolved(Pokemon pk) {
+        return !HasEvolution(pk);
+    }
+    public boolean IsBasic(Pokemon pk) {
+        return !IsEvolution(pk);
+    }
+    private Type[] getSecondariesForType(Type type){
+        switch (type){
+            case BUG:
+                return new Type[] { Type.GRASS, Type.POISON };
+            case GRASS:
+                return new Type[] { Type.POISON };
+            case FIRE:
+                return new Type[] { Type.FIGHTING };
+            case STEEL:
+            case GROUND:
+                return new Type[] { Type.ROCK };
+            case ROCK:
+            case WATER:
+                return new Type[] { Type.GROUND };
+            case ICE:
+                return new Type[] { Type.WATER, Type.GROUND, Type.ROCK };
+            case POISON:
+                return new Type[] { Type.DARK, Type.BUG };
+            case FLYING:
+                return new Type[] { Type.BUG };
+            case ELECTRIC:
+                return new Type[] { Type.BUG, Type.STEEL };
+            case GHOST:
+                return new Type[] { Type.POISON, Type.FLYING };
+            case DARK:
+                return new Type[] { Type.GROUND, Type.POISON };
+            case PSYCHIC:
+                return new Type[] { Type.FAIRY };
+            case FIGHTING:
+                return new Type[] { Type.DARK, Type.POISON };
+            case DRAGON:
+                return new Type[] { Type.GROUND, Type.ROCK };
+            case FAIRY:
+                return new Type[] { Type.GRASS, Type.WATER };
+            default:
+                return new Type[] { Type.BUG };
+        }
+    }
+
     @Override
     public List<Pokemon> getPickedStarters() {
         return pickedStarters;
     }
-
 
     @Override
     public void randomizeStaticPokemon(Settings settings) {
@@ -6959,7 +7168,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private boolean useTypeChance(Settings settings){
         int typePct = settings.getWildTypePercentage();
         boolean useType = false;
-        if(settings.useWildTypeModifier()){
+        if(settings.useWildType()){
             if(this.random.nextInt(100) < typePct) {
                 useType = true;
             }
@@ -6975,7 +7184,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // start with within 10% and add 5% either direction till we find
         // something
 
-        Type type = getTypesInGame()[settings.getWildTypeModifier()];
+        Type type = getTypesInGame()[settings.getWildType()];
         useType = useType && useTypeChance(settings);
 
         int balancedBST = bstBalanceLevel * 10 + 250;
@@ -7041,7 +7250,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     public Pokemon getRandomPokemon(boolean includeFormes, boolean noLegendaries, EncounterSet area, List<Pokemon> banned, Settings settings, boolean useType) {
-        Type type = getTypesInGame()[settings.getWildTypeModifier()];
+        Type type = getTypesInGame()[settings.getWildType()];
         Pokemon result;
         Pokemon randomNonLegendaryPokemon = includeFormes ? randomNonLegendaryPokemonInclFormes() : randomNonLegendaryPokemon();
         Pokemon randomPokemon = includeFormes ? randomPokemonInclFormes() : randomPokemon();

@@ -791,7 +791,7 @@
                   </hspacer>
                   <vspacer id="499d4">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="1" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                   </vspacer>
@@ -820,7 +820,7 @@
                   </component>
                   <component id="c1c80" class="javax.swing.JRadioButton" binding="spRandomCompletelyRadioButton" default-binding="true">
                     <constraints>
-                      <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -831,7 +831,7 @@
                   </component>
                   <component id="12184" class="javax.swing.JRadioButton" binding="spRandomTwoEvosRadioButton">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="1" row-span="1" col-span="4" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -885,6 +885,29 @@
                       <enabled value="false"/>
                       <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spRandomizeStarterHeldItemsCheckBox.text"/>
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spRandomizeStarterHeldItemsCheckBox.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="79471" class="javax.swing.JRadioButton" binding="spTypeRadioButton">
+                    <constraints>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spTypeRadioButton.text"/>
+                      <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spCustomRadioButton.toolTipText"/>
+                    </properties>
+                  </component>
+                  <component id="bd5f1" class="javax.swing.JComboBox" binding="spTypeComboBox">
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0" ipadx="60"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <model>
+                        <item value="Normal"/>
+                      </model>
                     </properties>
                   </component>
                   <component id="a1ea2" class="javax.swing.JCheckBox" binding="spBanBadItemsCheckBox" default-binding="true">
@@ -3870,6 +3893,7 @@
       <member id="94a4e"/>
       <member id="c1c80"/>
       <member id="12184"/>
+      <member id="79471"/>
     </group>
     <group name="staticPokemonButtonGroup">
       <member id="a28a1"/>

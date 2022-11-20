@@ -271,6 +271,11 @@ public class Randomizer {
                 romHandler.randomizeBasicTwoEvosStarters(settings);
                 startersChanged = true;
                 break;
+            case TYPE_ADVANCED:
+                Type type = romHandler.getTypesInGame()[settings.getStartersType()];
+                romHandler.randomizeStartersOfType(type, settings);
+                startersChanged = true;
+                break;
             default:
                 break;
         }
@@ -589,7 +594,7 @@ public class Randomizer {
                 wildsChanged = true;
                 break;
             default:
-                if (settings.useWildTypeModifier()){
+                if (settings.useWildType()){
                     romHandler.onlyChangeWildTypeAndLevels(settings);
                     wildsChanged = true;
                 } else if (settings.isWildLevelsModified()) {
@@ -1073,6 +1078,9 @@ public class Randomizer {
                 break;
             case RANDOM_WITH_TWO_EVOLUTIONS:
                 log.println("--Random 2-Evolution Starters--");
+                break;
+            case TYPE_ADVANCED:
+                log.println("--Random Type Starters--");
                 break;
             default:
                 break;
