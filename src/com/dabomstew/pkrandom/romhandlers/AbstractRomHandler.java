@@ -4024,15 +4024,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         setStarters(pickedStarters);
     }
 
-    public void randomizeStartersOfType(Type type, Settings settings) {
+    @Override
+    public void randomizeStartersOfType(Type type, Settings settings){
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
-        int starterCount = starterCount();
 
-        List<Pokemon> unique = new ArrayList<>();
-        List<Pokemon> weighted = new ArrayList<>();
-        //create banned list
+        pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, allowAltFormes, banIrregularAltFormes);
+        setStarters(pickedStarters);
+    }
+
+    @Override
+    public List<Pokemon> getPokemon(boolean abilitiesUnchanged, boolean allowAltFormes, boolean banIrregularAltFormes) {
+        checkPokemonRestrictions();
         List<Pokemon> banned = getBannedFormesForPlayerPokemon();
         if (abilitiesUnchanged) {
             List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
@@ -4044,37 +4048,45 @@ public abstract class AbstractRomHandler implements RomHandler {
         //get all pokemon
         List<Pokemon> allPokes =
                 allowAltFormes ?
-                        this.getPokemonInclFormes()
-                                .stream()
-                                .filter(pk -> pk != null && !pk.actuallyCosmetic)
+                        this.getPokemonInclFormes().stream()
+                                .filter(pk -> pk == null || (!pk.actuallyCosmetic && !banned.contains(pk)))
                                 .collect(Collectors.toList()) :
                         this.getPokemon().stream()
-                                .filter(Objects::nonNull)
+                                .filter(pk -> pk != null || !banned.contains(pk))
                                 .collect(Collectors.toList());
+        return allPokes;
+    }
+
+    @Override
+    public List<Pokemon> getRandomStartersOfType(Type type, boolean abilitiesUnchanged, boolean allowAltFormes, boolean banIrregularAltFormes) {
+        int starterCount = starterCount();
+
+        List<Pokemon> unique = new ArrayList<>();
+        List<Pokemon> weighted = new ArrayList<>();
+        //get all pokemon
+        List<Pokemon> allPokes = getPokemon(abilitiesUnchanged, allowAltFormes, banIrregularAltFormes);
         Type[] allowedSecondaries = new Type[] { Type.NORMAL };
         //create a pool of all 2+ evolution pokemon of pure type
         for (Pokemon pk : allPokes) {
-            if(!banned.contains(pk)) {
-                int weight = getStarterWeight(pk, type, allowedSecondaries);
-                if(weight > 0) {
-                    unique.add(pk);
-                    for(int i=0; i<weight; i++) {
-                        weighted.add(pk);
-                    }
+            int weight = getStarterWeight(pk, type, allowedSecondaries) + originalStarterWeight(type, pk);
+            if(weight > 0) {
+                unique.add(pk);
+                for(int i=0; i<weight; i++) {
+                    weighted.add(pk);
                 }
             }
         }
         //we couldn't get a nice pool to randomise starts from so extent accepted types
-        if(unique.size() < starterCount * 2.5){
+        if(unique.size() < starterCount * 2.7){//3 starters = 8 in pool
             allowedSecondaries = getSecondariesForType(type);
             for (Pokemon pk : allPokes) {
-                if(!banned.contains(pk)) {
-                    int weight = getStarterWeight(pk, type, allowedSecondaries) / 2;
-                    if(weight > 0) {
-                        unique.add(pk);
-                        for(int i=0; i<weight; i++) {
-                            weighted.add(pk);
-                        }
+                int w = getStarterWeight(pk, type, allowedSecondaries);
+                int weight = Math.max(1, w / 2);// get half weight for dual types
+                //check w because weight is min 1
+                if (w > 0) {
+                    unique.add(pk);
+                    for (int i = 0; i < weight; i++) {
+                        weighted.add(pk);
                     }
                 }
             }
@@ -4101,32 +4113,38 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
         //randomise starters
-        pickedStarters = new ArrayList<>();
+        List<Pokemon> randomStarters = new ArrayList<>();
         for(int i = 0; i < starterCount; i++) {
             Pokemon pk = weighted.get(random.nextInt(weighted.size()));
-            pickedStarters.add(pk);
-            while( weighted.contains(pk)){
+            randomStarters.add(pk);
+            while(weighted.contains(pk)){
                 weighted.remove(pk);
             }
             unique.remove(pk);
         }
-        setStarters(pickedStarters);
+        return randomStarters;
     }
 
     private int getStarterWeight(Pokemon pk, Type type, Type[] allowedSecondaries){
+        if(pk == null)
+            return 0;
         if(IsBasic(pk)) {
             int evos = CountEvos(pk, type, allowedSecondaries);
             int baseStats = getFullEvolutionStats(pk, type, allowedSecondaries);
             if (evos >= 2) {
                 if(baseStats < 601) {
-                    if (baseStats > 474 && baseStats < 535) {
-                        return 5;
+                    if (baseStats > 384 && baseStats < 536) {
+                        if(baseStats > 449){
+                            return 5;
+                        } else {
+                            return 4;
+                        }
                     }
                     return 3;
                 }
             } else if(evos == 1){
                 if(baseStats < 601) {
-                    if (baseStats > 474 && baseStats < 535) {
+                    if (baseStats > 449 && baseStats < 536) {
                         return 2;
                     }
                     return  1;
@@ -4148,7 +4166,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         size--;
                     }
                 }
-                avg /= size;
+                avg = size > 0 ? avg/size : 0;
                 return avg;
             }
             return pk.bstForPowerLevels();
@@ -4177,7 +4195,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         if(hasSecondary && allowedSecondaries.length > 0) {
             boolean secondaryAllowed = false;
             for (Type other : allowedSecondaries) {
-                secondaryAllowed = pk.primaryType == other || pk.secondaryType == other;
+                if(pk.primaryType == other || pk.secondaryType == other)
+                    secondaryAllowed = true;
             }
             return isType && secondaryAllowed;
         }
@@ -4198,7 +4217,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private Type[] getSecondariesForType(Type type){
         switch (type){
             case BUG:
-                return new Type[] { Type.GRASS, Type.POISON };
+                return new Type[] { Type.GRASS, Type.POISON, Type.GROUND };
             case GRASS:
                 return new Type[] { Type.POISON };
             case FIRE:
@@ -4231,6 +4250,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 return new Type[] { Type.GRASS, Type.WATER };
             default:
                 return new Type[] { Type.BUG };
+        }
+    }
+    private int originalStarterWeight(Type type, Pokemon pk){
+        if (pk == null) {
+            return 0;
+        }
+        switch(pk.number) {
+            case Species.bulbasaur:
+                return type == Type.GRASS ? 4 : 0;
+            default:
+                return 0;
         }
     }
 

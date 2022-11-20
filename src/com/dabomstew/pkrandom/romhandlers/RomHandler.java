@@ -88,6 +88,8 @@ public interface RomHandler {
     // Instead, you use index on the species' National Dex ID
     // ======================================================
 
+    List<Pokemon> getPokemon(boolean abilitiesUnchanged, boolean allowAltFormes, boolean banIrregularAltFormes);
+
     List<Pokemon> getPokemon();
 
     List<Pokemon> getPokemonInclFormes();
@@ -127,6 +129,8 @@ public interface RomHandler {
     void randomizeBasicTwoEvosStarters(Settings settings);
 
     void randomizeStartersOfType(Type type, Settings settings);
+
+    List<Pokemon> getRandomStartersOfType(Type type, boolean abilitiesUnchanged, boolean allowAltFormes, boolean banIrregularAltFormes);
 
     List<Pokemon> getPickedStarters();
 

@@ -306,6 +306,7 @@ public class NewRandomizerGUI {
     private JSlider wpPercentageTypeSlider;
     private JComboBox spTypeComboBox;
     private JRadioButton spTypeRadioButton;
+    private JButton spTypeTestButton;
 
     private static JFrame frame;
 
@@ -435,6 +436,7 @@ public class NewRandomizerGUI {
         spRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomTwoEvosRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spTypeRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spTypeTestButton.addActionListener(e -> setTypeStarters());
         stpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpSwapLegendariesSwapStandardsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -649,6 +651,7 @@ public class NewRandomizerGUI {
 
     private void initExplicit() {
         versionLabel.setText(String.format(bundle.getString("GUI.versionLabel.text"), Version.VERSION_STRING));
+        spTypeTestButton.setVisible(false);
         mtNoExistLabel.setVisible(false);
         mtNoneAvailableLabel.setVisible(false);
         baseTweaksPanel.add(liveTweaksPanel);
@@ -2200,6 +2203,9 @@ public class NewRandomizerGUI {
         spTypeComboBox.setEnabled(false);
         spTypeComboBox.setSelectedIndex(0);
         spTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
+        spTypeTestButton.setVisible(true);
+        spTypeTestButton.setEnabled(false);
+        spTypeTestButton.setSelected(false);
         spRandomizeStarterHeldItemsCheckBox.setVisible(true);
         spRandomizeStarterHeldItemsCheckBox.setEnabled(false);
         spRandomizeStarterHeldItemsCheckBox.setSelected(false);
@@ -2804,6 +2810,10 @@ public class NewRandomizerGUI {
             if (romHandler.isYellow()) {
                 spComboBox3.setVisible(false);
                 spTypeRadioButton.setVisible(false);
+                spTypeComboBox.setVisible(false);
+                spTypeTestButton.setVisible(false);
+            } else {
+                spTypeTestButton.setVisible(true);
             }
             populateDropdowns();
 
@@ -3292,8 +3302,10 @@ public class NewRandomizerGUI {
 
         if (spTypeRadioButton.isEnabled() && spTypeRadioButton.isSelected()) {
             spTypeComboBox.setEnabled(true);
+            spTypeTestButton.setEnabled(true);
         } else {
             spTypeComboBox.setEnabled(false);
+            spTypeTestButton.setEnabled(false);
         }
 
         if (stpUnchangedRadioButton.isSelected()) {
@@ -3808,13 +3820,7 @@ public class NewRandomizerGUI {
 
     private void populateDropdowns() {
         List<Pokemon> currentStarters = romHandler.getStarters();
-        List<Pokemon> allPokes =
-                romHandler.generationOfPokemon() >= 6 ?
-                        romHandler.getPokemonInclFormes()
-                                .stream()
-                                .filter(pk -> pk == null || !pk.actuallyCosmetic)
-                                .collect(Collectors.toList()) :
-                        romHandler.getPokemon();
+        List<Pokemon> allPokes = romHandler.getPokemon(true, romHandler.generationOfPokemon() >= 6, false);
         String[] pokeNames = new String[allPokes.size()];
         pokeNames[0] = "Random";
         for (int i = 1; i < allPokes.size(); i++) {
@@ -3880,6 +3886,27 @@ public class NewRandomizerGUI {
         romHandler.setTypesInGame(typesInGame);
         wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
         spTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
+    }
+
+    private void setTypeStarters(){
+        if (!romHandler.isYellow()) {
+            boolean allowAltFormes = romHandler.generationOfPokemon() >= 6;
+            List<Pokemon> randomStarters = romHandler.getRandomStartersOfType(romHandler.getTypesInGame()[spTypeComboBox.getSelectedIndex()], true, allowAltFormes, false);
+            List<Pokemon> allPokes = romHandler.getPokemon(true, allowAltFormes, false);
+
+            if(randomStarters.size() > 0)
+                spComboBox1.setSelectedIndex(allPokes.indexOf(randomStarters.get(0)));
+            else
+                spComboBox1.setSelectedIndex(0);
+            if (randomStarters.size() > 1)
+                spComboBox2.setSelectedIndex(allPokes.indexOf(randomStarters.get(1)));
+            else
+                spComboBox1.setSelectedIndex(0);
+            if (randomStarters.size() > 2)
+                spComboBox3.setSelectedIndex(allPokes.indexOf(randomStarters.get(2)));
+            else
+                spComboBox1.setSelectedIndex(0);
+        }
     }
 
     private ImageIcon makeMascotIcon() {
