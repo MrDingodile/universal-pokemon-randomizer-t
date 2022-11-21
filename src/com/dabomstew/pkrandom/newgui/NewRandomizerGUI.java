@@ -307,7 +307,8 @@ public class NewRandomizerGUI {
     private JComboBox spTypeComboBox;
     private JRadioButton spTypeRadioButton;
     private JButton spTypeTestButton;
-
+    private JCheckBox miscDisableLowHPMusicCheckBox;	
+	
     private static JFrame frame;
 
     private static String launcherInput = "";
