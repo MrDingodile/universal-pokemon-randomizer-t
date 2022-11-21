@@ -114,6 +114,7 @@ public class Settings {
     private boolean limit600;
     private boolean banBadRandomStarterHeldItems;
     private int startersType;
+    private boolean rivalCounterType;
 
     public enum TypesMod {
         UNCHANGED, RANDOM_FOLLOW_EVOLUTIONS, COMPLETELY_RANDOM
@@ -212,8 +213,8 @@ public class Settings {
     private boolean wildLevelsModified;
     private int wildLevelModifier = 0;
 
-    private boolean useWildTypeModifier;
-    private int wildTypeModifier = 0;
+    private boolean useWildType;
+    private int wildType = 0;
     private int wildTypePercentage = 0;
     private boolean allowWildAltFormes;
 
@@ -430,7 +431,7 @@ public class Settings {
         // 16 wild pokemon 2
         out.write(makeByteSelected(useMinimumCatchRate, blockWildLegendaries,
                 wildPokemonRestrictionMod == WildPokemonRestrictionMod.SIMILAR_STRENGTH, randomizeWildPokemonHeldItems,
-                banBadRandomWildPokemonHeldItems, false, false, balanceShakingGrass));
+                banBadRandomWildPokemonHeldItems, useWildType, false, balanceShakingGrass));
 
         // 17 static pokemon
         out.write(makeByteSelected(staticPokemonMod == StaticPokemonMod.UNCHANGED,
@@ -447,7 +448,7 @@ public class Settings {
                 tmsHmsCompatibilityMod == TMsHMsCompatibilityMod.FULL));
 
         // 19 tms part 2
-        out.write(makeByteSelected(fullHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
+        out.write(makeByteSelected(fullHMCompat, fullNormalHMCompat, tmsFollowEvolutions, tutorFollowEvolutions));
 
         // 20 tms good damaging
         out.write((tmsForceGoodDamaging ? 0x80 : 0) | tmsGoodDamagingPercent);
@@ -578,7 +579,8 @@ public class Settings {
                 consumableItemsOnlyForTrainerPokemon,
                 sensibleItemsOnlyForTrainerPokemon,
                 highestLevelOnlyGetsItemsForTrainerPokemon,
-                ensureTwoAbilities));
+                ensureTwoAbilities,
+                rivalCounterType));
 
         // 49 pickup item randomization
         out.write(makeByteSelected(pickupItemsMod == PickupItemsMod.RANDOM,
@@ -587,6 +589,11 @@ public class Settings {
 
         // 50 elite four unique pokemon (3 bits) + catch rate level (3 bits)
         out.write(eliteFourUniquePokemonNumber | ((minimumCatchRateLevel - 1) << 3));
+
+        // 51-53: typezlocke stuff
+        out.write(wildTypePercentage);
+        out.write(wildType);
+        out.write(startersType);
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -657,11 +664,12 @@ public class Settings {
         settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
                 0, // CUSTOM
                 1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
+                3, // RANDOM_WITH_TWO_EVOLUTIONS
+                4 // TYPE_ADVANCED
         ));
-        settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
-        settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
-        settings.setAllowStarterAltFormes(restoreState(data[4],6));
+        settings.setRandomizeStartersHeldItems(restoreState(data[4], 5));
+        settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 6));
+        settings.setAllowStarterAltFormes(restoreState(data[4],7));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
@@ -706,6 +714,7 @@ public class Settings {
         settings.setBlockWildLegendaries(restoreState(data[16], 1));
         settings.setRandomizeWildPokemonHeldItems(restoreState(data[16], 3));
         settings.setBanBadRandomWildPokemonHeldItems(restoreState(data[16], 4));
+        settings.setUseWildType(restoreState(data[16], 5));
         settings.setBalanceShakingGrass(restoreState(data[16], 7));
 
         settings.setStaticPokemonMod(restoreEnum(StaticPokemonMod.class, data[17], 0, // UNCHANGED
@@ -731,8 +740,9 @@ public class Settings {
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
 
         settings.setFullHMCompat(restoreState(data[19], 0));
-        settings.setTmsFollowEvolutions(restoreState(data[19], 1));
-        settings.setTutorFollowEvolutions(restoreState(data[19], 2));
+        settings.setFullNormalHMCompat(restoreState(data[19], 1));
+        settings.setTmsFollowEvolutions(restoreState(data[19], 2));
+        settings.setTutorFollowEvolutions(restoreState(data[19], 3));
 
         settings.setTmsForceGoodDamaging(restoreState(data[20], 7));
         settings.setTmsGoodDamagingPercent(data[20] & 0x7F);
@@ -867,6 +877,7 @@ public class Settings {
         settings.setSensibleItemsOnlyForTrainers(restoreState(data[48], 4));
         settings.setHighestLevelGetsItemsForTrainers(restoreState(data[48], 5));
         settings.setEnsureTwoAbilities(restoreState(data[48], 6));
+        settings.setRivalCounterType(restoreState(data[48], 7));
 
         settings.setPickupItemsMod(restoreEnum(PickupItemsMod.class, data[49],
                 1, // UNCHANGED
@@ -876,6 +887,10 @@ public class Settings {
 
         settings.setEliteFourUniquePokemonNumber(data[50] & 0x7);
         settings.setMinimumCatchRateLevel(((data[50] & 0x38) >> 3) + 1);
+
+        settings.setWildTypePercentage(data[51]);
+        settings.setWildType(data[52]);
+        settings.setStartersType(data[53]);
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1336,6 +1351,13 @@ public class Settings {
 
     public void setRandomizeStartersHeldItems(boolean randomizeStartersHeldItems) {
         this.randomizeStartersHeldItems = randomizeStartersHeldItems;
+    }
+
+    public boolean getRivalCounterType() {
+        return rivalCounterType;
+    }
+    public void setRivalCounterType(boolean rivalCounterType){
+        this.rivalCounterType = rivalCounterType;
     }
 
     public boolean isBanBadRandomStarterHeldItems() {
@@ -1870,16 +1892,16 @@ public class Settings {
     }
 
     public boolean useWildType() {
-        return useWildTypeModifier;
+        return useWildType;
     }
 
-    public void setUseWildType(boolean useWildTypeModifier) { this.useWildTypeModifier = useWildTypeModifier; }
+    public void setUseWildType(boolean useWildTypeModifier) { this.useWildType = useWildTypeModifier; }
 
     public int getWildType() {
-        return wildTypeModifier;
+        return wildType;
     }
 
-    public void setWildType(int wildType) { this.wildTypeModifier = wildType; }
+    public void setWildType(int wildType) { this.wildType = wildType; }
 
     public int getWildTypePercentage() {
         return wildTypePercentage;
