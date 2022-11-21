@@ -48,6 +48,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> noLegendaryListInclFormes, onlyLegendaryListInclFormes;
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     private List<Pokemon> pickedStarters;
+    private List<Pokemon> rivalStarters;
     protected final Random random;
     private final Random cosmeticRandom;
     protected PrintStream logStream;
@@ -1691,6 +1692,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         int forceFullyEvolvedLevel = settings.getTrainersForceFullyEvolvedLevel();
         boolean forceChallengeMode = (settings.getCurrentMiscTweaks() & MiscTweak.FORCE_CHALLENGE_MODE.getValue()) > 0;
         boolean rivalCarriesStarter = settings.isRivalCarriesStarterThroughout();
+        Type type = typesInGame[settings.getStartersType()];
 
         checkPokemonRestrictions();
 
@@ -1808,7 +1810,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     Boolean.compare(eliteFourIndices.contains(currentTrainers.indexOf(t2)+1),eliteFourIndices.contains(currentTrainers.indexOf(t1)+1)));
             illegalEvoChains = forceFullyEvolved;
             if (rivalCarriesStarter) {
-                List<Pokemon> starterList = getStarters().subList(0,3);
+                List<Pokemon> starterList = getRivalStarters(settings).subList(0,3);
                 for (Pokemon starter: starterList) {
                     // If rival/friend carries starter, the starters cannot be set as unique
                     bannedFromUniqueList.add(starter);
@@ -4025,13 +4027,27 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void randomizeRivalStartersOfType(Type type, Settings settings){
+    public List<Pokemon> getRivalStarters(){
+        return rivalStarters;
+    }
+
+    @Override
+    public List<Pokemon> getRivalStarters(Settings settings){
+        boolean rivalCounterType = settings.getRivalCounterType();
+        if(!rivalCounterType){
+            rivalStarters = getStarters();
+            return rivalStarters;
+        }
+
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
+        Type type = typesInGame[settings.getStartersType()];
         type = getRivalType(type);
+        if(rivalStarters.size() == 0 || !HasType(rivalStarters.get(0), type, new Type[0])) {
+            rivalStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
+        }
 
         //rival should have narrower pokemon, stronger and favor 2 evos more
-        pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
-        setStarters(pickedStarters);
+        return rivalStarters;
     }
 
     @Override
@@ -6847,7 +6863,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Get the starters
         // us 0 1 2 => them 0+n 1+n 2+n
-        List<Pokemon> starters = this.getStarters();
+        List<Pokemon> starters = this.getRivalStarters();
 
         // Yellow needs its own case, unfortunately.
         if (isYellow()) {

@@ -128,7 +128,8 @@ public interface RomHandler {
 
     void randomizeBasicTwoEvosStarters(Settings settings);
 
-    void randomizeRivalStartersOfType(Type type, Settings settings);
+    List<Pokemon> getRivalStarters();
+    List<Pokemon> getRivalStarters(Settings settings);
     void randomizeStartersOfType(Type type, Settings settings);
 
     List<Pokemon> getRandomStartersOfType(Type type, boolean abilitiesUnchanged, boolean allowAltFormes);
