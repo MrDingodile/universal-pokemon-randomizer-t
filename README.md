@@ -23,9 +23,9 @@ Refer to Universal Pokemon Randomizer ZX instead, as this at the moment is just 
         2. Main Class: select the third option `NewRandomizerGUI` <kbd>(com.dabomstew.pkrandom.newgui.NewRandomizerGUI)</kbd>
         3. OK
     3. Select the new Artifact, 
-        1. name: `PokeRandoZX:jar`
+        1. name: `PokeRandoT:jar`
         2. Output Directory: `[your path]\universal-pokemon-randomizer-t\launcher\`
-        3. Rename jar as well to `PokeRandoZX.jar`
+        3. Rename jar as well to `PokeRandoT.jar`
 7. `Apply` - You can build through: Build > Build Artifacts
 
 # Typezlocke (Gym Leader Challenge):
