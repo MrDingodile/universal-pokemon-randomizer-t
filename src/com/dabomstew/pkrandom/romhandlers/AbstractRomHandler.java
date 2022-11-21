@@ -4029,6 +4029,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         type = getRivalType(type);
 
+        //rival should have narrower pokemon, stronger and favor 2 evos more
         pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
         setStarters(pickedStarters);
     }
