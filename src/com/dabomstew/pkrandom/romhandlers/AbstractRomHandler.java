@@ -4090,7 +4090,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> weighted = new ArrayList<>();
         //get all pokemon
         List<Pokemon> allPokes = getPokemon(abilitiesUnchanged, allowAltFormes, true);
-        Type[] allowedSecondaries = new Type[] { Type.NORMAL };
+        Type[] allowedSecondaries = type == Type.NORMAL ? new Type[] { Type.FAIRY } : new Type[] { Type.NORMAL };
         //create a pool of all 2+ evolution pokemon of pure type
         for (Pokemon pk : allPokes) {
             int weight = getStarterWeight(pk, type, allowedSecondaries) + originalStarterWeight(type, pk);
@@ -4319,7 +4319,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             case GHOST:
                 return Type.DARK;
             case DARK:
-                return Type.STEEL;
+                return generationOfPokemon() >= 6 ? Type.FAIRY : Type.NORMAL;
             case PSYCHIC:
                 return Type.STEEL;
             case FIGHTING:
