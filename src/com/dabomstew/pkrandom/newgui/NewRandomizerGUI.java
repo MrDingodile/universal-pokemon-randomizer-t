@@ -3853,7 +3853,6 @@ public class NewRandomizerGUI {
         }
         mdUpdateComboBox.setModel(new DefaultComboBoxModel<>(moveGenerationNumbers));
 
-
         tpComboBox.setModel(new DefaultComboBoxModel<>(getTrainerSettingsForGeneration(romHandler.generationOfPokemon())));
         tpComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -3891,7 +3890,7 @@ public class NewRandomizerGUI {
     private void setTypeStarters(){
         if (!romHandler.isYellow()) {
             boolean allowAltFormes = romHandler.generationOfPokemon() >= 6;
-            List<Pokemon> randomStarters = romHandler.getRandomStartersOfType(romHandler.getTypesInGame()[spTypeComboBox.getSelectedIndex()], true, allowAltFormes, false);
+            List<Pokemon> randomStarters = romHandler.getRandomStartersOfType(romHandler.getTypesInGame()[spTypeComboBox.getSelectedIndex()], true, allowAltFormes);
             List<Pokemon> allPokes = romHandler.getPokemon(true, allowAltFormes, false);
 
             if(randomStarters.size() > 0)

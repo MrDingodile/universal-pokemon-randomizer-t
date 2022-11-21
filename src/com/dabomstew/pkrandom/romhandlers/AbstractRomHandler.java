@@ -4025,12 +4025,20 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public void randomizeRivalStartersOfType(Type type, Settings settings){
+        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
+        type = getRivalType(type);
+
+        pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
+        setStarters(pickedStarters);
+    }
+
+    @Override
     public void randomizeStartersOfType(Type type, Settings settings){
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
-        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
 
-        pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, allowAltFormes, banIrregularAltFormes);
+        pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, allowAltFormes);
         setStarters(pickedStarters);
     }
 
@@ -4058,13 +4066,13 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public List<Pokemon> getRandomStartersOfType(Type type, boolean abilitiesUnchanged, boolean allowAltFormes, boolean banIrregularAltFormes) {
+    public List<Pokemon> getRandomStartersOfType(Type type, boolean abilitiesUnchanged, boolean allowAltFormes) {
         int starterCount = starterCount();
 
         List<Pokemon> unique = new ArrayList<>();
         List<Pokemon> weighted = new ArrayList<>();
         //get all pokemon
-        List<Pokemon> allPokes = getPokemon(abilitiesUnchanged, allowAltFormes, banIrregularAltFormes);
+        List<Pokemon> allPokes = getPokemon(abilitiesUnchanged, allowAltFormes, true);
         Type[] allowedSecondaries = new Type[] { Type.NORMAL };
         //create a pool of all 2+ evolution pokemon of pure type
         for (Pokemon pk : allPokes) {
@@ -4081,7 +4089,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             allowedSecondaries = getSecondariesForType(type);
             for (Pokemon pk : allPokes) {
                 int w = getStarterWeight(pk, type, allowedSecondaries);
-                int weight = Math.max(1, w / 2);// get half weight for dual types
+                int weight = Math.max(1, w / 2);// get half  weight for dual types
                 //check w because weight is min 1
                 if (w > 0) {
                     unique.add(pk);
@@ -4135,12 +4143,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if(baseStats < 601) {
                     if (baseStats > 384 && baseStats < 536) {
                         if(baseStats > 449){
-                            return 5;
+                            return 6;
                         } else {
-                            return 4;
+                            return 5;
                         }
                     }
-                    return 3;
+                    return 4;
                 }
             } else if(evos == 1){
                 if(baseStats < 601) {
@@ -4156,10 +4164,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     private int getFullEvolutionStats(Pokemon pk, Type t, Type[] allowedSecondaries) {
         if(HasType(pk, t, allowedSecondaries)) {
             if (HasEvolution(pk)) {
-                int avg = 0;
+                int avg = 0, pow;
                 int size = pk.evolutionsFrom.size();
                 for (Evolution ev : pk.evolutionsFrom) {
-                    int pow = getFullEvolutionStats(ev.to, t, new Type[0]);
+                    pow = getFullEvolutionStats(ev.to, t, new Type[0]);
                     if(pow > 0) {
                         avg += pow;
                     } else {
@@ -4258,9 +4266,53 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         switch(pk.number) {
             case Species.bulbasaur:
-                return type == Type.GRASS ? 4 : 0;
+                return type == Type.GRASS ? 6 : 0;
+            case Species.clamperl:
+            case Species.karrablast:
+            case Species.shelmet:
+                return -6;//requires too specific evolutions
             default:
                 return 0;
+        }
+    }
+    private Type getRivalType(Type type){
+        switch (type){
+            case BUG:
+                return Type.FLYING;
+            case GRASS:
+                return Type.POISON;
+            case FIRE:
+                return Type.WATER;
+            case STEEL:
+                return Type.ELECTRIC;
+            case GROUND:
+                return Type.GHOST;
+            case ROCK:
+                return Type.FIGHTING;
+            case WATER:
+                return Type.GRASS;//lotad
+            case ICE:
+                return Type.WATER;
+            case POISON:
+                return Type.GROUND;
+            case FLYING:
+                return Type.ROCK;
+            case ELECTRIC:
+                return Type.GRASS;
+            case GHOST:
+                return Type.DARK;
+            case DARK:
+                return Type.STEEL;
+            case PSYCHIC:
+                return Type.STEEL;
+            case FIGHTING:
+                return Type.PSYCHIC;
+            case DRAGON:
+                return Type.DRAGON;
+            case FAIRY:
+                return Type.FIRE;
+            default:
+                return Type.NORMAL;
         }
     }
 
