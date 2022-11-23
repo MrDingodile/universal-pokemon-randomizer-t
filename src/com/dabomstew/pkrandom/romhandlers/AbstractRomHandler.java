@@ -4077,7 +4077,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 .filter(pk -> pk == null || (!pk.actuallyCosmetic && !banned.contains(pk)))
                                 .collect(Collectors.toList()) :
                         this.getPokemon().stream()
-                                .filter(pk -> pk != null || !banned.contains(pk))
+                                .filter(pk -> pk == null || !banned.contains(pk))
                                 .collect(Collectors.toList());
         return allPokes;
     }
