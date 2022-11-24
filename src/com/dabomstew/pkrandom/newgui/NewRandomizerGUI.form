@@ -1953,7 +1953,7 @@
                     <children>
                       <component id="3f329" class="javax.swing.JCheckBox" binding="tpRivalCarriesStarterCheckBox">
                         <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -1962,7 +1962,7 @@
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpRivalCarriesStarterCheckBox.toolTipText"/>
                         </properties>
                       </component>
-                      <component id="587b2" class="javax.swing.JCheckBox">
+                      <component id="587b2" class="javax.swing.JCheckBox" binding="tpRivalTypeCheckbox">
                         <constraints>
                           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
@@ -1971,6 +1971,18 @@
                           <enabled value="false"/>
                           <text value="test"/>
                           <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.tpRivalCarriesStarterCheckBox.toolTipText"/>
+                        </properties>
+                      </component>
+                      <component id="21fc1" class="javax.swing.JButton" binding="tpRivalTypeButton">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <horizontalTextPosition value="11"/>
+                          <text value="normal"/>
+                          <verticalAlignment value="0"/>
                         </properties>
                       </component>
                     </children>

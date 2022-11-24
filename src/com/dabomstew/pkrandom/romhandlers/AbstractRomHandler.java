@@ -4042,11 +4042,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         Type type = typesInGame[settings.getStartersType()];
         type = getRivalType(type);
-        if(rivalStarters.size() == 0 || !HasType(rivalStarters.get(0), type, new Type[0])) {
+        if(rivalStarters == null || rivalStarters.size() == 0 || !HasType(rivalStarters.get(0), type, new Type[0])) {
+            statClamp = new int[] { 449, 479, 546, 681 };
             rivalStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
         }
 
-        //rival should have narrower pokemon, stronger and favor 2 evos more
         return rivalStarters;
     }
 
@@ -4055,6 +4055,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         boolean allowAltFormes = settings.isAllowStarterAltFormes();
 
+        statClamp = new int[] { 384, 449, 536, 601 };
         pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, allowAltFormes);
         setStarters(pickedStarters);
     }
@@ -4150,6 +4151,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         return randomStarters;
     }
 
+    private int[] statClamp = new int[] { 384, 449, 536, 601 };
     private int getStarterWeight(Pokemon pk, Type type, Type[] allowedSecondaries){
         if(pk == null)
             return 0;
@@ -4157,22 +4159,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             int evos = CountEvos(pk, type, allowedSecondaries);
             int baseStats = getFullEvolutionStats(pk, type, allowedSecondaries);
             if (evos >= 2) {
-                if(baseStats < 601) {
-                    if (baseStats > 384 && baseStats < 536) {
-                        if(baseStats > 449){
+                if(baseStats > statClamp[0] && baseStats < statClamp[3]) {
+                    if (baseStats < statClamp[2]) {
+                        if(baseStats > statClamp[1]){
                             return 6;
-                        } else {
-                            return 5;
                         }
+                        return 5;
                     }
                     return 4;
                 }
             } else if(evos == 1){
-                if(baseStats < 601) {
-                    if (baseStats > 449 && baseStats < 536) {
+                if(baseStats < statClamp[3]) {
+                    if (baseStats > statClamp[1] && baseStats < statClamp[2]) {
                         return 2;
                     }
-                    return  1;
+                    if (baseStats > statClamp[0]) {
+                        return 1;
+                    }
                 }
             }
         }
@@ -4287,6 +4290,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             case Species.clamperl:
             case Species.karrablast:
             case Species.shelmet:
+            case Species.remoraid:
+            case Species.mantyke:
                 return -6;//requires too specific evolutions
             default:
                 return 0;
