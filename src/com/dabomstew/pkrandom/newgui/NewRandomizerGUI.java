@@ -3534,8 +3534,8 @@ public class NewRandomizerGUI {
             List<Pokemon> allPokes = romHandler.getPokemon(true, allowAltFormes, false);
 
             if(randomStarters != null && randomStarters.size() > 0) {
-                Pokemon p = randomStarters.get(0);
-                tpRivalTypeButton.setText(p.name);
+                //todo couter grass not work
+                tpRivalTypeButton.setText(randomStarters.get(0).name + ", " + randomStarters.get(1).name + ", " + randomStarters.get(2).name);
             } else {
                 tpRivalTypeButton.setText("error");
             }

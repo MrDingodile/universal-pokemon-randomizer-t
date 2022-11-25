@@ -49,6 +49,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     private List<Pokemon> noLegendaryAltsList, onlyLegendaryAltsList;
     private List<Pokemon> pickedStarters;
     private List<Pokemon> rivalStarters;
+    private Type rivalStarterType = Type.NORMAL;
     protected final Random random;
     private final Random cosmeticRandom;
     protected PrintStream logStream;
@@ -4042,8 +4043,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
         Type type = typesInGame[settings.getStartersType()];
         type = getRivalType(type);
-        if(rivalStarters == null || rivalStarters.size() == 0 || !HasType(rivalStarters.get(0), type, new Type[0])) {
-            statClamp = new int[] { 449, 479, 546, 681 };
+        if(rivalStarters == null || rivalStarters.size() == 0 || rivalStarterType != type) {
+            rivalStarterType = type;
+            statClamp = new int[] { 449, 484, 546, 681 };
             rivalStarters = getRandomStartersOfType(type, abilitiesUnchanged, true);
         }
 
@@ -4058,6 +4060,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         statClamp = new int[] { 384, 449, 536, 601 };
         pickedStarters = getRandomStartersOfType(type, abilitiesUnchanged, allowAltFormes);
         setStarters(pickedStarters);
+        if(supportsStarterHeldItems()) {
+            List<Integer> l = getStarterItems(type);
+            if(l != null)
+                setStarterHeldItems(l);
+        }
     }
 
     @Override
@@ -4336,6 +4343,62 @@ public abstract class AbstractRomHandler implements RomHandler {
             default:
                 return Type.NORMAL;
         }
+    }
+
+    private List<Integer> getStarterItems(Type type){
+        Integer gen = generationOfPokemon();
+        if(gen == 2 || gen == 3){
+            //GSC, FRLG, RS
+            switch (type) {
+                case GROUND:
+                    return Arrays.asList(Items.metalCoat);
+                case WATER:
+                    return Arrays.asList(Items.dragonScale);
+            }
+        } else if(gen == 4){
+            //DPPt
+            //todo: move to Veilstone Department Store
+            switch (type) {
+                case ELECTRIC:
+                    return Arrays.asList(Items.electirizer);
+                case GROUND:
+                    return Arrays.asList(Items.metalCoat);
+                case FIRE:
+                    return Arrays.asList(Items.magmarizer);
+                case WATER:
+                    return Arrays.asList(Items.dragonScale);
+                case GHOST:
+                    return Arrays.asList(Items.reaperCloth);
+                case ROCK:
+                    return Arrays.asList(Items.protector);
+            }
+        } else if(gen == 7){
+            //SM, USUM
+            switch (type) {
+                case ELECTRIC:
+                    return Arrays.asList(Items.electirizer, Items.electirizer, Items.electirizer);
+                case GROUND:
+                    return Arrays.asList(Items.metalCoat, Items.protector, Items.razorFang);
+                case WATER:
+                    return Arrays.asList(Items.dragonScale, Items.prismScale, Items.deepSeaScale);
+                case GHOST:
+                    return Arrays.asList(Items.reaperCloth, Items.reaperCloth, Items.reaperCloth);
+                case FAIRY:
+                    return Arrays.asList(Items.whippedDream, Items.whippedDream, Items.whippedDream);
+                case ROCK:
+                    return Arrays.asList(Items.protector, Items.protector, Items.protector);
+                case FLYING:
+                    return Arrays.asList(Items.razorFang, Items.razorFang, Items.razorFang);
+                case DARK:
+                case ICE:
+                case FIGHTING:
+                case POISON:
+                    return Arrays.asList(Items.razorClaw, Items.razorClaw, Items.razorClaw);
+            }
+        }
+        //todo: create list for HGSS Goldenrod Department Store
+        //todo: create list for ORAS Lilycove Department Store
+        return null;
     }
 
     @Override
@@ -4984,7 +5047,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
         int tmCount = this.getTMCount();
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
-            if(compatEntry.getKey().primaryType != Type.NORMAL){
+            Pokemon pk = compatEntry.getKey();
+            if(pk.primaryType != Type.NORMAL || pk.secondaryType != null){
                 continue;
             }
             boolean[] flags = compatEntry.getValue();
