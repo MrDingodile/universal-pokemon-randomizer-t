@@ -3159,6 +3159,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet : Species.karrablast);
                         addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
+                    if (evo.type == EvolutionType.LEVEL_UPSIDE_DOWN){
+                        // This is the Inkay evolution
+                        evo.type = EvolutionType.LEVEL_NIGHT;
+                        evo.extraInfo = 30;
+                        Evolution extraEntry = new Evolution(evo.from, evo.to, true,
+                                EvolutionType.LEVEL_DAY, evo.extraInfo);
+                        extraEvolutions.add(extraEntry);
+                    }
                     // TBD: Pancham, Sliggoo? Sylveon?
                 }
 
