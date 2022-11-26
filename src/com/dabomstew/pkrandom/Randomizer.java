@@ -457,6 +457,7 @@ public class Randomizer {
             trainersChanged = true;
         }
 
+        romHandler.getRivalStarters(settings);
         switch(settings.getTrainersMod()) {
             case RANDOM:
             case DISTRIBUTED:
@@ -475,8 +476,8 @@ public class Randomizer {
         }
 
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
-                || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
-                && settings.isRivalCarriesStarterThroughout()) {
+          || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
+          && settings.isRivalCarriesStarterThroughout()) {
             romHandler.rivalCarriesStarter();
             trainersChanged = true;
         }
