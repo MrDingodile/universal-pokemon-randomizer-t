@@ -892,18 +892,6 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spCustomRadioButton.toolTipText"/>
                     </properties>
                   </component>
-                  <component id="bd5f1" class="javax.swing.JComboBox" binding="spTypeComboBox">
-                    <constraints>
-                      <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                      <gridbag weightx="0.0" weighty="0.0" ipadx="60"/>
-                    </constraints>
-                    <properties>
-                      <enabled value="false"/>
-                      <model>
-                        <item value="Normal"/>
-                      </model>
-                    </properties>
-                  </component>
                   <component id="a1ea2" class="javax.swing.JCheckBox" binding="spBanBadItemsCheckBox" default-binding="true">
                     <constraints>
                       <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -928,7 +916,7 @@
                   </component>
                   <component id="2ee8d" class="javax.swing.JButton" binding="spTypeTestButton">
                     <constraints>
-                      <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                       <gridbag weightx="0.0" weighty="0.0"/>
                     </constraints>
                     <properties>
@@ -955,6 +943,40 @@
                       <toolTipText resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.spAllowAltFormesCheckBox.toolTipText"/>
                     </properties>
                   </component>
+                  <grid id="aa0e1" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="3" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="true"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="bd5f1" class="javax.swing.JComboBox" binding="spTypeComboBox">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                          <model>
+                            <item value="Normal"/>
+                          </model>
+                        </properties>
+                      </component>
+                      <component id="b2d9f" class="javax.swing.JFormattedTextField" binding="spTypeDiffBar">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="50" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <enabled value="false"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
                 </children>
               </grid>
               <hspacer id="48447">
@@ -3889,10 +3911,13 @@
       <component id="ca71c" class="javax.swing.JLabel" binding="websiteLinkLabel">
         <constraints>
           <grid row="6" column="11" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.0"/>
+          <gridbag weightx="0.1" weighty="0.0"/>
         </constraints>
         <properties>
+          <maximumSize width="120" height="16"/>
+          <requestFocusEnabled value="false"/>
           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.websiteLinkLabel.text"/>
+          <verifyInputWhenFocusTarget value="false"/>
         </properties>
       </component>
       <component id="df6e7" class="javax.swing.JLabel" binding="versionLabel">
@@ -3985,13 +4010,20 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
+      <hspacer id="b212f">
+        <constraints>
+          <grid row="7" column="10" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.2" weighty="0.0"/>
+        </constraints>
+      </hspacer>
       <component id="1c59e" class="javax.swing.JLabel" binding="wikiLinkLabel">
         <constraints>
-          <grid row="6" column="10" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag top="0" left="0" bottom="0" right="10" weightx="0.0" weighty="0.0"/>
+          <grid row="6" column="9" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
           <horizontalAlignment value="10"/>
+          <maximumSize width="23" height="16"/>
           <text resource-bundle="com/dabomstew/pkrandom/newgui/Bundle" key="GUI.wikiLinkLabel.text"/>
         </properties>
       </component>

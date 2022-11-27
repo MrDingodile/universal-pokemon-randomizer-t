@@ -32,10 +32,7 @@ import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
-import com.dabomstew.pkrandom.pokemon.ExpCurve;
-import com.dabomstew.pkrandom.pokemon.GenRestrictions;
-import com.dabomstew.pkrandom.pokemon.Pokemon;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import javax.swing.*;
@@ -310,6 +307,7 @@ public class NewRandomizerGUI {
     private JCheckBox miscDisableLowHPMusicCheckBox;
     private JButton tpRivalTypeButton;
     private JCheckBox tpRivalTypeCheckbox;
+    private JFormattedTextField spTypeDiffBar;
 
     private static JFrame frame;
 
@@ -440,6 +438,7 @@ public class NewRandomizerGUI {
         spRandomTwoEvosRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spTypeRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spTypeTestButton.addActionListener(e -> setTypeStarters());
+        spTypeComboBox.addActionListener(e -> setTypeDifficulty());
         tpRivalTypeButton.addActionListener(e -> testRivalTypeStarter());
         tpRivalTypeCheckbox.addActionListener(e -> enableOrDisableSubControls());
         stpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -2118,6 +2117,7 @@ public class NewRandomizerGUI {
         spComboBox3.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
         InitStat(spTypeComboBox);
         spTypeComboBox.setModel(new DefaultComboBoxModel<>(new String[] { "--" }));
+        InitStat(spTypeDiffBar);
         InitStat(spTypeTestButton);
         InitStat(tpRivalTypeButton);
         InitStat(tpRivalTypeCheckbox);
@@ -2413,10 +2413,13 @@ public class NewRandomizerGUI {
                 spComboBox3.setVisible(false);
                 spTypeRadioButton.setVisible(false);
                 spTypeComboBox.setVisible(false);
+                spTypeDiffBar.setVisible(false);
                 spTypeTestButton.setVisible(false);
                 tpRivalTypeButton.setVisible(false);
                 tpRivalTypeCheckbox.setVisible(false);
             } else {
+                spTypeComboBox.setVisible(true);
+                spTypeDiffBar.setVisible(true);
                 spTypeTestButton.setVisible(true);
                 tpRivalTypeButton.setVisible(true);
                 tpRivalTypeCheckbox.setVisible(true);
@@ -3496,6 +3499,7 @@ public class NewRandomizerGUI {
         romHandler.setTypesInGame(typesInGame);
         wpPercentageTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
         spTypeComboBox.setModel(new DefaultComboBoxModel<>(romHandler.getTypesInGame()));
+        setTypeDifficulty();
     }
 
     private void setTypeStarters(){
@@ -3534,12 +3538,104 @@ public class NewRandomizerGUI {
             List<Pokemon> allPokes = romHandler.getPokemon(true, allowAltFormes, false);
 
             if(randomStarters != null && randomStarters.size() > 0) {
-                //todo couter grass not work
                 tpRivalTypeButton.setText(randomStarters.get(0).name + ", " + randomStarters.get(1).name + ", " + randomStarters.get(2).name);
             } else {
                 tpRivalTypeButton.setText("error");
             }
         }
+    }
+
+    private void setTypeDifficulty(){
+        if(romHandler == null)
+            return;
+        if(romHandler.getTypesInGame() == null)
+            return;
+        List<Pokemon> allPokes = romHandler.getPokemon(true, true, true);
+        //List<Type> types = Arrays.asList(romHandler.getTypesInGame());
+        Type t = romHandler.getTypesInGame()[spTypeComboBox.getSelectedIndex()];
+        int dual = 0;
+        int unique = 0;
+        int legendaries = 0;
+        int total = 0;
+        List<Type> types = new ArrayList<>();
+
+        for (Pokemon pk : allPokes) {
+            if(pk == null)
+                continue;
+            Type p = pk.primaryType;
+            Type s = pk.secondaryType;
+
+            if(p == t || s == t){
+                if(pk.isLegendary() || pk.isUltraBeast())
+                    legendaries++;
+                if(pk.evolutionsTo == null || pk.evolutionsTo.size() == 0)
+                    unique++;
+
+                if(s != null) {
+                    if(p != Type.NORMAL && s != Type.NORMAL){
+                        dual++;
+                    }
+                    if(s != Type.NORMAL && s != t){
+                        if(!types.contains(s))
+                            types.add(s);
+                    }
+                }
+                if(p != Type.NORMAL && p != t){
+                    if(!types.contains(p))
+                        types.add(p);
+                }
+                total++;
+            }
+        }
+        int effectiveness = 0;
+        Map<Type, Effectiveness> table = Effectiveness.against(t, null, romHandler.generationOfPokemon());
+        for(Map.Entry<Type, Effectiveness> e : table.entrySet()){
+            if(types.contains(e.getKey())){
+                switch(e.getValue()){
+                    case ZERO:
+                        effectiveness+=2;
+                        break;
+                    case QUARTER:
+                    case HALF:
+                        effectiveness+=1;
+                        break;
+                    case NEUTRAL:
+                        break;
+                    case DOUBLE:
+                    case QUADRUPLE:
+                        effectiveness-=1;
+                        break;
+                }
+            }
+        }
+
+        int noTypes = types.size();
+        double typeCompleteness = Math.pow(noTypes/14f, 0.25f);
+        float diversity = dual / (1f * total);
+        double diff = 1.0f - ((0.7f * (unique+total-legendaries+effectiveness)/100f) * (0.45f + typeCompleteness * 0.25f + diversity * 0.3f));
+        setTypeDifficulty((int)(diff*100));
+    }
+
+    private void setTypeDifficulty(int val){
+        String s = "";
+        for(int i=0; i<val; i+=8){
+            s+= "█";
+        }
+        spTypeDiffBar.setText(s);
+        Color c;
+        if(val < 25){
+            c = new Color(120, 240,0);
+        } else if (val < 40){
+            c = new Color(170, 230,0);
+        } else if (val < 50){
+            c = new Color(240, 220,0);
+        } else if (val < 65){
+            c = new Color(255, 170,0);
+        } else {
+            c = new Color(255, 80,0);
+        }
+        spTypeDiffBar.setForeground(c);
+        spTypeDiffBar.setDisabledTextColor(c);
     }
 
     private ImageIcon makeMascotIcon() {
