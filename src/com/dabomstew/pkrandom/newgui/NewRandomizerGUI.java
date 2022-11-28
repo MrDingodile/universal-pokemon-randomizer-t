@@ -28,6 +28,7 @@ package com.dabomstew.pkrandom.newgui;
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.cli.CliRandomizer;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Species;
 import com.dabomstew.pkrandom.exceptions.CannotWriteToLocationException;
 import com.dabomstew.pkrandom.exceptions.EncryptedROMException;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -2420,8 +2421,13 @@ public class NewRandomizerGUI {
             } else {
                 spTypeComboBox.setVisible(true);
                 spTypeDiffBar.setVisible(true);
-                spTypeTestButton.setVisible(true);
-                tpRivalTypeButton.setVisible(true);
+                if(Version.VERSION_STRING.contains("dev")) {
+                    spTypeTestButton.setVisible(true);
+                    tpRivalTypeButton.setVisible(true);
+                } else {
+                    spTypeTestButton.setVisible(false);
+                    tpRivalTypeButton.setVisible(false);
+                }
                 tpRivalTypeCheckbox.setVisible(true);
             }
             populateDropdowns();
@@ -3552,75 +3558,116 @@ public class NewRandomizerGUI {
             return;
         List<Pokemon> allPokes = romHandler.getPokemon(true, true, true);
         //List<Type> types = Arrays.asList(romHandler.getTypesInGame());
-        Type t = romHandler.getTypesInGame()[spTypeComboBox.getSelectedIndex()];
+        Type[] allTypes = romHandler.getTypesInGame();
+        Type t = allTypes[spTypeComboBox.getSelectedIndex()];
         int dual = 0;
-        int unique = 0;
+        int unique = 0, uniqueNoLegend = 0;
         int legendaries = 0;
         int total = 0;
+        int avgStat = 0;
         List<Type> types = new ArrayList<>();
+        String statString = "";
 
         for (Pokemon pk : allPokes) {
-            if(pk == null)
+            if(pk == null || pk.actuallyCosmetic || (pk.megaEvolutionsTo != null && pk.megaEvolutionsTo.size() > 0) || pk.number == Species.unown)
                 continue;
-            Type p = pk.primaryType;
-            Type s = pk.secondaryType;
 
-            if(p == t || s == t){
-                if(pk.isLegendary() || pk.isUltraBeast())
-                    legendaries++;
-                if(pk.evolutionsTo == null || pk.evolutionsTo.size() == 0)
-                    unique++;
+            boolean legendary = false;
+            if(pk.evolutionsTo == null || pk.evolutionsTo.size() == 0) {
+                Pokemon full = getFullEvolution(pk, t);
+                int stat = getBST(full, t);
+                //if stats and type
+                if(stat > 0) {
+                    if(full.isLegendary() || full.isUltraBeast()) {
+                        legendary = true;
+                        legendaries++;
+                    }
 
-                if(s != null) {
-                    if(p != Type.NORMAL && s != Type.NORMAL){
+                    if(!legendary) {
+                        if (uniqueNoLegend % 10 == 0)
+                            statString += "<br />";
+                        if(pk.primaryType == t || pk.secondaryType == t)
+                            statString += pk.name + ": " + stat + ", ";
+                        else
+                            statString += pk.name + "*: " + stat + ", ";
+
+                        avgStat += stat;
+                        if (full.secondaryType == null || full.secondaryType == Type.NORMAL || full.primaryType == Type.NORMAL) {
+                            //pure++
+                        } else {
+                            dual++;
+                        }
+                        unique++;
+                        total++;
+                        uniqueNoLegend++;
+                    }
+                }
+            } else {
+                Type p = pk.primaryType;
+                Type s = pk.secondaryType;
+                if(p == t || s == t) {
+                    if(pk.isLegendary() || pk.isUltraBeast()) {
+                        legendaries++;
+                    }
+                    if (s == null || s == Type.NORMAL || p == Type.NORMAL) {
+                        //pure++
+                    } else {
                         dual++;
                     }
-                    if(s != Type.NORMAL && s != t){
-                        if(!types.contains(s))
-                            types.add(s);
-                    }
-                }
-                if(p != Type.NORMAL && p != t){
-                    if(!types.contains(p))
+                    total++;
+                    if(IsDual(s, t) && !types.contains(s))
+                        types.add(s);
+                    if(IsDual(p, t) && !types.contains(p))
                         types.add(p);
                 }
-                total++;
             }
         }
+        if(uniqueNoLegend > 0)
+            avgStat = (int)(avgStat / (double)(uniqueNoLegend));
+
         int effectiveness = 0;
+        //todo: reverse
+
         Map<Type, Effectiveness> table = Effectiveness.against(t, null, romHandler.generationOfPokemon());
         for(Map.Entry<Type, Effectiveness> e : table.entrySet()){
-            if(types.contains(e.getKey())){
-                switch(e.getValue()){
-                    case ZERO:
-                        effectiveness+=2;
-                        break;
-                    case QUARTER:
-                    case HALF:
-                        effectiveness+=1;
-                        break;
-                    case NEUTRAL:
-                        break;
-                    case DOUBLE:
-                    case QUADRUPLE:
-                        effectiveness-=1;
-                        break;
-                }
+            switch(e.getValue()){
+                case ZERO:
+                    effectiveness+=2;
+                    break;
+                case QUARTER:
+                case HALF:
+                    effectiveness+=1;
+                    break;
+                case NEUTRAL:
+                    break;
+                case DOUBLE:
+                case QUADRUPLE:
+                    effectiveness-=1;
+                    break;
             }
         }
 
         int noTypes = types.size();
         double typeCompleteness = Math.pow(noTypes/14f, 0.25f);
         float diversity = dual / (1f * total);
-        double diff = 1.0f - ((0.7f * (unique+total-legendaries+effectiveness)/100f) * (0.45f + typeCompleteness * 0.25f + diversity * 0.3f));
-        setTypeDifficulty((int)(diff*100));
+        double diff = 1.0f - ((0.7f * (unique+(total-legendaries)+effectiveness)/100f) * (0.45f + typeCompleteness * 0.25f + diversity * 0.3f));
+        double statModifier = Math.pow(1f-((avgStat-500)/500f),2f);
+
+
+        statString += "<br /> unique: " + unique + ", total: " + total + ", legendary: " + legendaries + ", effectiveness: " + effectiveness + ", diversity: " + diversity;
+
+        setTypeDifficulty((int)(diff*statModifier*100), avgStat, statString);
     }
 
-    private void setTypeDifficulty(int val){
+    private void setTypeDifficulty(int val, int power, String ss){
         String s = "";
         for(int i=0; i<val; i+=8){
             s+= "█";
         }
+        if(Version.VERSION_STRING.contains("dev"))
+            spTypeDiffBar.setToolTipText("<html>" + val + "%, avg bst: " + power + "... " + ss + "</html>");
+        else
+            spTypeDiffBar.setToolTipText(val + "%");
         spTypeDiffBar.setText(s);
         Color c;
         if(val < 25){
@@ -3636,6 +3683,35 @@ public class NewRandomizerGUI {
         }
         spTypeDiffBar.setForeground(c);
         spTypeDiffBar.setDisabledTextColor(c);
+    }
+
+    private Pokemon getFullEvolution(Pokemon pk, Type t) {
+        Pokemon full = pk;
+        if (pk.evolutionsFrom != null) {
+            for (Evolution ev : pk.evolutionsFrom) {
+                Pokemon next = getFullEvolution(ev.to, t);
+                if(getBST(next, t) >= getBST(full, t)) {
+                    full = next;
+                }
+            }
+        }
+        return full;
+    }
+
+    private boolean IsDual(Type s, Type t){
+        if(s != null) {
+            if(s != Type.NORMAL && s != t){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int getBST(Pokemon pk, Type t){
+        if(pk.primaryType == t || pk.secondaryType == t){
+            return pk.bstForPowerLevels();
+        }
+        return 0;
     }
 
     private ImageIcon makeMascotIcon() {

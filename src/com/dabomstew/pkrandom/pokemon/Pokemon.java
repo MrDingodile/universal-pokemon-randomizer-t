@@ -203,7 +203,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public int bstForPowerLevels() {
         // Take into account Shedinja's purposefully nerfed HP
         if (number == Species.shedinja) {
-            return (attack + defense + spatk + spdef + speed) * 6 / 5;
+            return (int)((attack + defense * 2f + spatk + spdef * 2f + speed) * 6f / 5f);
         } else {
             return hp + attack + defense + spatk + spdef + speed;
         }

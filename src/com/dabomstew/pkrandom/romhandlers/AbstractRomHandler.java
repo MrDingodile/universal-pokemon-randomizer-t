@@ -4101,7 +4101,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         Type[] allowedSecondaries = type == Type.NORMAL ? new Type[] { Type.FAIRY } : new Type[] { Type.NORMAL };
         //create a pool of all 2+ evolution pokemon of pure type
         for (Pokemon pk : allPokes) {
-            int weight = getStarterWeight(pk, type, allowedSecondaries) + originalStarterWeight(type, pk);
+            int weight = getStarterWeight(pk, type, allowedSecondaries) + originalStarterWeight(type, pk) + ignoredStarterWeight(type, pk);
             if(weight > 0) {
                 unique.add(pk);
                 for(int i=0; i<weight; i++) {
@@ -4113,7 +4113,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if(unique.size() < starterCount * 2.7){//3 starters = 8 in pool
             allowedSecondaries = getSecondariesForType(type);
             for (Pokemon pk : allPokes) {
-                int w = getStarterWeight(pk, type, allowedSecondaries);
+                int w = getStarterWeight(pk, type, allowedSecondaries) + ignoredStarterWeight(type, pk);
                 int weight = Math.max(1, w / 2);// get half  weight for dual types
                 //check w because weight is min 1
                 if (w > 0) {
@@ -4226,7 +4226,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
     private boolean HasType(Pokemon pk, Type t, Type[] allowedSecondaries) {
         boolean hasSecondary = pk.secondaryType != null;
-        boolean isType = pk.primaryType == t || (hasSecondary && pk.secondaryType == t);
+        boolean isType = pk.primaryType == t || pk.secondaryType == t;
         if(hasSecondary && allowedSecondaries.length > 0) {
             boolean secondaryAllowed = false;
             for (Type other : allowedSecondaries) {
@@ -4238,16 +4238,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         return isType;
     }
     public boolean IsEvolution(Pokemon pk) {
-        return pk.evolutionsTo.size() > 0;
+        return pk.evolutionsTo != null && pk.evolutionsTo.size() > 0;
     }
     public boolean HasEvolution(Pokemon pk) {
-        return pk.evolutionsFrom.size() > 0;
+        return pk.evolutionsFrom != null && pk.evolutionsFrom.size() > 0;
     }
     public boolean FullyEvolved(Pokemon pk) {
         return !HasEvolution(pk);
     }
     public boolean IsBasic(Pokemon pk) {
-        return !IsEvolution(pk);
+        return !IsEvolution(pk) && (pk.megaEvolutionsTo == null || pk.megaEvolutionsTo.size() == 0);
     }
     private Type[] getSecondariesForType(Type type){
         switch (type){
@@ -4280,7 +4280,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             case FIGHTING:
                 return new Type[] { Type.DARK, Type.POISON };
             case DRAGON:
-                return new Type[] { Type.GROUND, Type.ROCK };
+                return new Type[] { Type.GROUND, Type.ROCK, Type.DARK };
             case FAIRY:
                 return new Type[] { Type.GRASS, Type.WATER };
             default:
@@ -4294,6 +4294,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         switch(pk.number) {
             case Species.bulbasaur:
                 return type == Type.GRASS ? 6 : 0;
+            default:
+                return 0;
+        }
+    }
+    private int ignoredStarterWeight(Type type, Pokemon pk){
+        if (pk == null) {
+            return 0;
+        }
+        switch(pk.number) {
             case Species.clamperl:
             case Species.karrablast:
             case Species.shelmet:
@@ -7823,7 +7832,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Pokemon> bannedForWildEncounters() {
-        return new ArrayList<>();
+        //screw unown in general it's antifun
+        return Collections.singletonList(mainPokemonList.get(Species.unown));
     }
 
     @Override

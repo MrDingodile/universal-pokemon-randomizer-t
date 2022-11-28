@@ -1793,7 +1793,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // See GenerateWildMon in wild_encounter.c in pokefirered
             return Collections.singletonList(pokes[Species.unown]);
         }
-        return new ArrayList<>();
+        return super.bannedForWildEncounters();
     }
 
     @Override
