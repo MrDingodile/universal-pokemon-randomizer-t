@@ -3561,7 +3561,7 @@ public class NewRandomizerGUI {
         Type[] allTypes = romHandler.getTypesInGame();
         Type t = allTypes[spTypeComboBox.getSelectedIndex()];
         int dual = 0;
-        int unique = 0, uniqueNoLegend = 0;
+        int unique = 0;
         int legendaries = 0;
         int total = 0;
         int avgStat = 0;
@@ -3573,33 +3573,56 @@ public class NewRandomizerGUI {
                 continue;
 
             boolean legendary = false;
+            boolean isForme = false;
             if(pk.evolutionsTo == null || pk.evolutionsTo.size() == 0) {
-                Pokemon full = getFullEvolution(pk, t);
-                int stat = getBST(full, t);
-                //if stats and type
-                if(stat > 0) {
-                    if(full.isLegendary() || full.isUltraBeast()) {
-                        legendary = true;
-                        legendaries++;
+                List<Pokemon> allMax = getFullEvolution(pk, t);
+                for(Pokemon full : allMax) {
+                    if(full.baseForme != null){
+                        switch (full.baseForme.number){
+                            case Species.castform:
+                            case Species.deoxys:
+                            case Species.cherrim:
+                                continue;
+                        }
                     }
 
-                    if(!legendary) {
-                        if (uniqueNoLegend % 10 == 0)
-                            statString += "<br />";
-                        if(pk.primaryType == t || pk.secondaryType == t)
-                            statString += pk.name + ": " + stat + ", ";
-                        else
-                            statString += pk.name + "*: " + stat + ", ";
-
-                        avgStat += stat;
-                        if (full.secondaryType == null || full.secondaryType == Type.NORMAL || full.primaryType == Type.NORMAL) {
-                            //pure++
-                        } else {
-                            dual++;
+                    int stat = getBST(full, t);
+                    //if stats and type
+                    if (stat > 0) {
+                        if(full.baseForme != null) {
+                            isForme = true;
                         }
-                        unique++;
-                        total++;
-                        uniqueNoLegend++;
+                        if (full.isLegendary() || full.isUltraBeast()) {
+                            legendary = true;
+                            if(!isForme) {
+                                legendaries++;
+                            }
+                        }
+
+                        if (!legendary) {
+                            if (unique % 10 == 0)
+                                statString += "<br />";
+                            if (pk.primaryType == t || pk.secondaryType == t) {
+                                if(allMax.size() > 1 || isForme)
+                                    statString += full.name + full.formeSuffix + "²: " + stat + ", ";
+                                else
+                                    statString += pk.name + ": " + stat + ", ";
+                            }
+                            else {
+                                statString += pk.name + "¹: " + stat + ", ";
+                            }
+
+                            if (full.secondaryType == null || full.secondaryType == Type.NORMAL || full.primaryType == Type.NORMAL) {
+                                //pure++
+                            } else {
+                                dual++;
+                            }
+                            if(!isForme || full.formeSuffix == "-H") {
+                                avgStat += stat;
+                                unique++;
+                            }
+                            total++;
+                        }
                     }
                 }
             } else {
@@ -3607,14 +3630,17 @@ public class NewRandomizerGUI {
                 Type s = pk.secondaryType;
                 if(p == t || s == t) {
                     if(pk.isLegendary() || pk.isUltraBeast()) {
+                        legendary = true;
                         legendaries++;
                     }
-                    if (s == null || s == Type.NORMAL || p == Type.NORMAL) {
-                        //pure++
-                    } else {
-                        dual++;
+                    if(!legendary) {
+                        if (s == null || s == Type.NORMAL || p == Type.NORMAL) {
+                            //pure++
+                        } else {
+                            dual++;
+                        }
+                        total++;
                     }
-                    total++;
                     if(IsDual(s, t) && !types.contains(s))
                         types.add(s);
                     if(IsDual(p, t) && !types.contains(p))
@@ -3622,12 +3648,10 @@ public class NewRandomizerGUI {
                 }
             }
         }
-        if(uniqueNoLegend > 0)
-            avgStat = (int)(avgStat / (double)(uniqueNoLegend));
+        if(unique > 0)
+            avgStat = (int)(avgStat / (double)(unique));
 
         int effectiveness = 0;
-        //todo: reverse
-
         Map<Type, Effectiveness> table = Effectiveness.against(t, null, romHandler.generationOfPokemon());
         for(Map.Entry<Type, Effectiveness> e : table.entrySet()){
             switch(e.getValue()){
@@ -3650,7 +3674,7 @@ public class NewRandomizerGUI {
         int noTypes = types.size();
         double typeCompleteness = Math.pow(noTypes/14f, 0.25f);
         float diversity = dual / (1f * total);
-        double diff = 1.0f - ((0.7f * (unique+(total-legendaries)+effectiveness)/100f) * (0.45f + typeCompleteness * 0.25f + diversity * 0.3f));
+        double diff = 1.0f - ((0.7f * (unique+total+effectiveness)/100f) * (0.45f + typeCompleteness * 0.25f + diversity * 0.3f));
         double statModifier = Math.pow(1f-((avgStat-500)/500f),2f);
 
 
@@ -3676,7 +3700,7 @@ public class NewRandomizerGUI {
             c = new Color(170, 230,0);
         } else if (val < 50){
             c = new Color(240, 220,0);
-        } else if (val < 65){
+        } else if (val < 70){
             c = new Color(255, 170,0);
         } else {
             c = new Color(255, 80,0);
@@ -3685,14 +3709,22 @@ public class NewRandomizerGUI {
         spTypeDiffBar.setDisabledTextColor(c);
     }
 
-    private Pokemon getFullEvolution(Pokemon pk, Type t) {
-        Pokemon full = pk;
-        if (pk.evolutionsFrom != null) {
+    private List<Pokemon> getFullEvolution(Pokemon pk, Type t) {
+        List<Pokemon> full = new ArrayList<>();
+        if (pk.evolutionsFrom != null && pk.evolutionsFrom.size() > 0) {
             for (Evolution ev : pk.evolutionsFrom) {
-                Pokemon next = getFullEvolution(ev.to, t);
-                if(getBST(next, t) >= getBST(full, t)) {
-                    full = next;
+                List<Pokemon> l = getFullEvolution(ev.to, t);
+                for(Pokemon next : l){
+                    if(getBST(next, t) >= getBST(pk, t)) {
+                        if(!full.contains(next))
+                            full.add(next);
+                    }
                 }
+            }
+        } else {
+            if(pk.primaryType == t || pk.secondaryType == t){
+                if(!full.contains(pk))
+                    full.add(pk);
             }
         }
         return full;
