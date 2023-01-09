@@ -329,10 +329,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         allowedItems = Gen2Constants.allowedItems.copy();
         nonBadItems = Gen2Constants.nonBadItems.copy();
         actualCRC32 = FileFunctions.getCRC32(rom);
-        // VietCrystal: exclude Burn Heal, Calcium, and Elixir
+        // VietCrystal: exclude Burn Heal, Calcium, TwistedSpoon, and Elixir
         // crashes your game if used, glitches out your inventory if carried
         if (isVietCrystal) {
-            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer);
+            allowedItems.banSingles(Gen2Items.burnHeal, Gen2Items.calcium, Gen2Items.elixer, Gen2Items.twistedSpoon);
         }
     }
 
@@ -1558,6 +1558,12 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     @Override
     public boolean hasStaticAltFormes() {
         return false;
+    }
+
+    @Override
+    public List<Pokemon> bannedForWildEncounters() {
+        // Ban Unown because they don't show up unless you complete a puzzle in the Ruins of Alph.
+        return new ArrayList<>(Collections.singletonList(pokes[Species.unown]));
     }
 
     @Override

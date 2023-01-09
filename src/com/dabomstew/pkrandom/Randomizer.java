@@ -489,6 +489,7 @@ public class Randomizer {
 
         if (settings.isBetterTrainerMovesets()) {
             romHandler.pickTrainerMovesets(settings);
+            trainersChanged = true;
             trainerMovesetsChanged = true;
         }
 
